@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MCBrokers — Herramientas Internas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --mcb-blue:#0057A4;
+      --mcb-green:#2FA24A;
+      --mcb-lime:#9CCB3B;
+      --ink:#1F2937;
+      --muted:#6B7280;
+      --stroke:#E5E7EB;
+      --surface:#ffffff;
+      --bg:#ffffff;
+    }
+    body{background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto}
+    .container{max-width:900px}
+    .card{background:var(--surface);border:1px solid var(--stroke);border-radius:16px;padding:1rem}
+    .input,select{background:#fff;border:1px solid #D1D5DB;border-radius:.7rem;padding:.7rem .85rem;color:var(--ink)}
+    .input:focus,select:focus{outline:3px solid color-mix(in oklab, var(--mcb-blue) 25%, white);outline-offset:2px}
+    .btn{background:var(--mcb-blue);border:1px solid #044b8f;border-radius:.9rem;padding:.75rem 1.15rem;color:#fff;font-weight:600;cursor:pointer}
+    .btn:hover{filter:brightness(1.06)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn-secondary{background:#fff;border:1px solid var(--stroke);color:var(--ink)}
+    .btn-secondary:hover{background:#F9FAFB}
+    .label{font-size:.85rem;color:#374151;font-weight:500;display:block;margin-bottom:.4rem}
+    .money{font-variant-numeric:tabular-nums}
+    .kpi{background:#F7FAFF;border:1px solid #DCEBFF;border-radius:14px;padding:.95rem}
+    .accent{color:var(--mcb-green)}
+    header .brand{display:flex;align-items:center;gap:14px}
+    header img{height:112px}
+    header h1{line-height:1}
+    .subtle{color:var(--muted)}
+    .primary-row {align-items:baseline}
+    .primary-label {font-size:1.05rem;font-weight:600;color:#0f172a}
+    .primary-amount {font-size:1.6rem;font-weight:800;color:var(--mcb-blue)}
+    .badge {
+      background: var(--mcb-lime);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      line-height: 1;
+    }
+
+    /* Sistema de pestañas */
+    .tabs{display:flex;gap:.5rem;border-bottom:2px solid var(--stroke);margin-bottom:1.5rem}
+    .tab{padding:.75rem 1.25rem;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;font-weight:500;color:var(--muted);transition:all .2s}
+    .tab:hover{color:var(--ink)}
+    .tab.active{color:var(--mcb-blue);border-bottom-color:var(--mcb-blue)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+
+    /* Estilos para selector de campañas */
+    .search-input{
+      background:#fff;
+      border:1px solid #D1D5DB;
+      border-radius:.7rem;
+      padding:.7rem .85rem 0.7rem 2.5rem;
+      color:var(--ink);
+      width:100%;
+    }
+    .search-wrapper{position:relative}
+    .search-icon{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--muted)}
+    .campana-card{
+      background:#fff;
+      border:1px solid var(--stroke);
+      border-radius:12px;
+      padding:1rem;
+      margin-bottom:.75rem;
+      transition:all .2s;
+    }
+    .campana-card:hover{
+      border-color:var(--mcb-blue);
+      box-shadow:0 2px 8px rgba(0,87,164,.1);
+    }
+    .campana-nombre{
+      font-size:1.05rem;
+      font-weight:700;
+      color:var(--ink);
+      font-family:monospace;
+      letter-spacing:-.5px;
+    }
+    .campana-meta{
+      font-size:.8rem;
+      color:var(--muted);
+      margin-top:.35rem;
+    }
+    .campana-meta span{
+      display:inline-block;
+      margin-right:1rem;
+    }
+    .copy-btn{
+      background:var(--mcb-green);
+      border:1px solid #26873d;
+      border-radius:.6rem;
+      padding:.4rem .8rem;
+      color:#fff;
+      font-size:.8rem;
+      font-weight:600;
+      cursor:pointer;
+      transition:all .2s;
+    }
+    .copy-btn:hover{filter:brightness(1.1)}
+    .copy-btn.copied{background:#22c55e;border-color:#16a34a}
+    .results-count{
+      font-size:.9rem;
+      color:var(--muted);
+      padding:.5rem 0;
+      font-weight:500;
+    }
+    .results-count strong{color:var(--mcb-blue)}
+    .empty-state{
+      text-align:center;
+      padding:3rem 1rem;
+      color:var(--muted);
+    }
+    .empty-state svg{
+      width:64px;
+      height:64px;
+      margin:0 auto 1rem;
+      opacity:.3;
+    }
+
+    /* Menús de Servicios */
+    .ms-nav-ramo{display:flex;gap:.35rem;border-bottom:2px solid var(--stroke);margin-bottom:1.25rem;flex-wrap:wrap}
+    .ms-tab-ramo{padding:.6rem 1.1rem;font-size:.9rem;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
+    .ms-tab-ramo:hover{color:var(--ink)}
+    .ms-tab-ramo.active{color:var(--mcb-blue);border-bottom-color:var(--mcb-blue)}
+    .ms-nav-aseg{display:flex;gap:.4rem;margin-bottom:1.25rem;flex-wrap:wrap}
+    .ms-pill-aseg{padding:.35rem 1rem;font-size:.8rem;font-weight:500;border:1px solid var(--stroke);border-radius:999px;cursor:pointer;color:var(--muted);transition:all .15s;background:#fff}
+    .ms-pill-aseg:hover{border-color:#85B7EB;color:var(--mcb-blue)}
+    .ms-pill-aseg.active{background:#E6F1FB;color:var(--mcb-blue);border-color:#85B7EB}
+    .ms-card{background:#fff;border:1px solid var(--stroke);border-radius:14px;padding:1rem 1.15rem;margin-bottom:.85rem}
+    .ms-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.85rem}
+    .ms-card-title{font-size:.95rem;font-weight:600;color:var(--ink);line-height:1.35}
+    .ms-badge-total{display:inline-flex;align-items:center;gap:.3rem;background:#E6F1FB;color:#185FA5;border-radius:999px;font-size:.75rem;font-weight:600;padding:.25rem .75rem;white-space:nowrap;flex-shrink:0}
+    .ms-badge-mcb{display:inline-flex;align-items:center;background:#EAF3DE;color:#3B6D11;border-radius:999px;font-size:.75rem;font-weight:600;padding:.25rem .75rem;white-space:nowrap}
+    .ms-badge-aseg{display:inline-flex;align-items:center;background:#E6F1FB;color:#185FA5;border-radius:999px;font-size:.75rem;font-weight:600;padding:.25rem .75rem;white-space:nowrap}
+    .ms-sla-badges{display:flex;gap:.35rem;flex-shrink:0;flex-wrap:wrap}
+    .ms-card-body{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    @media(max-width:640px){.ms-card-body{grid-template-columns:1fr}}
+    .ms-section-label{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+    .ms-tag{display:inline-block;font-size:.7rem;font-weight:600;padding:.15rem .5rem;border-radius:4px;margin-bottom:.45rem}
+    .ms-tag-formato{background:#FAEEDA;color:#854F0B}
+    .ms-tag-doc{background:#EEEDFE;color:#3C3489}
+    .ms-tag-adic{background:#FAECE7;color:#993C1D}
+    .ms-doc-item{display:flex;align-items:flex-start;gap:.4rem;font-size:.82rem;color:#374151;margin-bottom:.3rem;line-height:1.4}
+    .ms-doc-item svg{flex-shrink:0;margin-top:2px;opacity:.5}
+    .ms-note{background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:.75rem .9rem}
+    .ms-note-label{font-size:.7rem;font-weight:600;color:#92400E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+    .ms-note ul{list-style:none;padding:0;margin:0}
+    .ms-note li{display:flex;gap:.5rem;font-size:.8rem;color:#374151;line-height:1.5;margin-bottom:.25rem}
+    .ms-note li:last-child{margin-bottom:0}
+    .ms-note li::before{content:'•';color:#D97706;font-weight:700;flex-shrink:0;margin-top:.05rem}
+    .ms-links{display:flex;flex-wrap:wrap;gap:.4rem;padding-top:.75rem;border-top:1px solid var(--stroke);margin-top:.75rem}
+    .ms-link-btn{display:inline-flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--mcb-blue);border:1px solid #B5D4F4;border-radius:6px;padding:.3rem .75rem;background:#fff;cursor:pointer;text-decoration:none;transition:background .15s}
+    .ms-link-btn:hover{background:#E6F1FB}
+    .ms-formato-link{color:var(--mcb-blue);text-decoration:underline;text-underline-offset:2px;text-decoration-color:#B5D4F4;cursor:pointer}
+    .ms-formato-link:hover{text-decoration-color:var(--mcb-blue)}
+    .ms-placeholder{text-align:center;padding:3rem 1rem;color:var(--muted);border:1px dashed var(--stroke);border-radius:14px}
+    .ms-placeholder p{margin-top:.5rem;font-size:.85rem}
+    .ms-search-bar{width:100%;border:1px solid #D1D5DB;border-radius:.7rem;padding:.65rem 1rem .65rem 2.4rem;font-size:.88rem;color:var(--ink);background:#fff;margin-bottom:.75rem}
+    .ms-search-bar:focus{outline:3px solid color-mix(in oklab,var(--mcb-blue) 25%,white);outline-offset:2px}
+    .ms-search-wrap{position:relative;margin-bottom:.5rem}
+    .ms-search-icon{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;display:block;line-height:0}
+    .ms-filtros{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:1rem}
+    .ms-filtro-pill{padding:.3rem .85rem;font-size:.78rem;font-weight:500;border:1px solid var(--stroke);border-radius:999px;cursor:pointer;color:var(--muted);background:#fff;transition:all .15s}
+    .ms-filtro-pill:hover{border-color:#85B7EB;color:var(--mcb-blue)}
+    .ms-filtro-pill.active{background:#E6F1FB;color:var(--mcb-blue);border-color:#85B7EB}
+    .ms-sin-resultados{text-align:center;padding:2rem;color:var(--muted);font-size:.88rem}
+    .camp-nombre{font-family:monospace;font-size:1.05rem;font-weight:700;color:var(--ink);letter-spacing:-.5px}
+    .camp-badge-per{background:#EAF3DE;color:#3B6D11}
+    .camp-meta{display:flex;flex-wrap:wrap;gap:.35rem 1.1rem;font-size:.82rem;color:#374151;margin-top:.5rem}
+    .camp-ejemplos{font-size:.78rem;color:var(--muted);margin-top:.4rem;font-family:monospace}
+    .camp-credito{display:inline-block;background:#E6F1FB;color:#185FA5;font-size:.7rem;font-weight:600;padding:.15rem .55rem;border-radius:999px;margin-left:.4rem;vertical-align:middle}
+
+  </style>
+</head>
+<body>
+  <div class="container mx-auto p-4">
+    <header class="mb-5">
+      <div class="brand">
+        <img src="assets/Logo_Colores_MCB.png" alt="MCBrokers" />
+        <div>
+          <h1 class="text-2xl font-semibold">Herramientas Internas MCBrokers</h1>
+        </div>
+      </div>
+      <hr class="mt-4 border-gray-200"/>
+    </header>
+
+    <!-- Sistema de pestañas -->
+    <div class="tabs">
+      <div class="tab active" data-tab="salud">Cotizador GNP Salud</div>
+      <div class="tab" data-tab="vidatotal">Cotizador VidaTotal</div>
+      <div class="tab" data-tab="menus">Menús de Servicios</div>
+      <div class="tab" data-tab="campanas">Campañas de Emisión Autos</div>
+    </div>
+
+    <!-- PESTAÑA 1: COTIZADOR GNP SALUD -->
+    <div id="tab-salud" class="tab-content active">
+      <!-- Fila 0: Vigencia tarifaria -->
+      <section class="card mb-3 flex items-center gap-4">
+        <label class="label mb-0" style="white-space:nowrap">Vigencia tarifaria</label>
+        <select id="vigencia" class="input" style="width:auto">
+          <option value="2025-2026">2025 – 2026</option>
+          <option value="2026-2027">2026 – 2027</option>
+        </select>
+        <span id="vigencia-aviso" class="text-xs text-amber-600 font-medium hidden">
+          ⚠️ Solo Bimbo disponible en este periodo. Las tarifas STRM 2026-2027 aún no han sido cargadas.
+        </span>
+      </section>
+
+      <!-- Fila 1: Empresa + Producto (solo STRM) + Plan (solo STRM) -->
+      <section class="card grid md:grid-cols-3 gap-4 mb-3">
+        <div>
+          <label class="label">Empresa</label>
+          <select id="cliente" class="input w-full">
+            <option value="BIMBO">BIMBO</option>
+            <option value="STRM">STRM</option>
+          </select>
+        </div>
+        <div id="producto-wrap" style="display:none">
+          <label class="label">Producto (STRM)</label>
+          <select id="producto" class="input w-full">
+            <option value="LINEA_AZUL">Línea Azul</option>
+            <option value="EXCESOS">Excesos</option>
+          </select>
+        </div>
+        <div id="plan-wrap" style="display:none">
+          <label class="label">Plan (STRM)</label>
+          <select id="plan" class="input w-full">
+            <option value="T1">T1</option>
+            <option value="T2">T2</option>
+            <option value="TraspasoRM">Traspaso Respaldo Médico</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Fila 2: Género + Edad -->
+      <section class="card grid md:grid-cols-3 gap-4 mb-3">
+        <div>
+          <label class="label">Género</label>
+          <select id="genero" class="input w-full">
+            <option value="H">Hombre</option>
+            <option value="M">Mujer</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Edad</label>
+          <input id="edad" type="number" min="0" max="120" value="25" class="input w-full"/>
+        </div>
+        <div class="hidden md:block"></div>
+      </section>
+
+      <!-- Fila 3: Extra-Prima -->
+      <section class="card grid md:grid-cols-3 gap-4 mb-3 items-center">
+        <div>
+          <label class="label">Extra-Prima (%)</label>
+          <input id="extraprima" type="number" min="0" max="100" step="0.1" value="0" placeholder="0" class="input w-full"/>
+        </div>
+        <div id="pago-mixto-wrap" style="display:none">
+          <label class="label flex items-center gap-2 cursor-pointer">
+            <input id="pago-mixto" type="checkbox" class="w-4 h-4"/>
+            <span>Pago Mixto (solo STRM)</span>
+          </label>
+          <p class="text-xs text-gray-500 mt-1">70% semanal + 15% agosto + 15% dic</p>
+        </div>
+        <div class="hidden md:block"></div>
+      </section>
+
+      <!-- Fila 4: Botón Consultar -->
+      <section class="card mb-4">
+        <button id="btn-consultar" class="btn">Consultar</button>
+        <p id="status" class="text-xs text-red-600 mt-2 hidden"></p>
+      </section>
+
+      <!-- Resultado: Prima Original -->
+      <section id="result-original" class="grid gap-4" style="display:none">
+        <div class="kpi">
+          <div class="flex justify-between primary-row">
+            <span class="primary-label">Prima Total Anual</span>
+            <div class="flex items-center gap-2">
+              <strong id="total-original" class="money primary-amount">—</strong>
+              <span class="badge" id="badge-original">ORIGINAL</span>
+            </div>
+          </div>
+          <div class="flex justify-between mt-1">
+            <span>Prima Mensual</span><strong id="mensual-original" class="money">—</strong>
+          </div>
+          <div id="row-semanal-original" class="flex justify-between mt-1" style="display:none">
+            <span>Prima Semanal <span class="subtle">(anual/48)</span></span>
+            <strong id="semanal-original" class="money">—</strong>
+          </div>
+          <div id="row-catorcenal-original" class="flex justify-between mt-1" style="display:none">
+            <span>Prima Catorcenal <span class="subtle">(anual/24)</span></span>
+            <strong id="catorcenal-original" class="money">—</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resultado: Prima con Extra-Prima -->
+      <section id="result-adjusted" class="grid gap-4 mt-4" style="display:none">
+        <div class="kpi border-2 border-green-200">
+          <div class="flex justify-between primary-row">
+            <span class="primary-label">Prima Total Extra-Primada</span>
+            <div class="flex items-center gap-2">
+              <strong id="total-adjusted" class="money" style="font-size:1.6rem;font-weight:800;color:var(--mcb-green)">—</strong>
+              <span class="badge" id="badge-adjusted" style="background:var(--mcb-green)">+0%</span>
+            </div>
+          </div>
+          <div class="flex justify-between mt-1">
+            <span>Prima Mensual</span><strong id="mensual-adjusted" class="money" style="color:var(--mcb-green)">—</strong>
+          </div>
+          <div id="row-semanal-adjusted" class="flex justify-between mt-1" style="display:none">
+            <span>Prima Semanal</span>
+            <strong id="semanal-adjusted" class="money" style="color:var(--mcb-green)">—</strong>
+          </div>
+          <div id="row-catorcenal-adjusted" class="flex justify-between mt-1" style="display:none">
+            <span>Prima Catorcenal</span>
+            <strong id="catorcenal-adjusted" class="money" style="color:var(--mcb-green)">—</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resultado: Pago Mixto -->
+      <section id="result-mixto" class="grid gap-4 mt-4" style="display:none">
+        <div class="kpi" style="background:#FFF9F0;border:1px solid #FFE4B5">
+          <div class="flex justify-between items-baseline mb-3">
+            <span class="font-semibold text-lg">Modalidad Pago Mixto</span>
+            <span class="badge" style="background:#FF8C00">STRM</span>
+          </div>
+          <div class="flex justify-between mt-2">
+            <span>48 Pagos Semanales (70%)</span>
+            <strong id="mixto-semanal" class="money">—</strong>
+          </div>
+          <div class="flex justify-between mt-2">
+            <span>Extraordinario agosto (15%)</span>
+            <strong id="mixto-agosto" class="money">—</strong>
+          </div>
+          <div class="flex justify-between mt-2">
+            <span>Extraordinario diciembre (15%)</span>
+            <strong id="mixto-diciembre" class="money">—</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- Meses de cobertura -->
+      <section id="meses-wrap" class="card mt-4" style="display:none">
+        <div class="grid md:grid-cols-3 gap-4 items-end">
+          <div>
+            <label class="label">Meses de cobertura</label>
+            <select id="meses" class="input w-full"></select>
+          </div>
+          <div class="md:col-span-2 kpi">
+            <div class="flex justify-between">
+              <span>Total para <span id="meses-label" class="accent">—</span> mes(es)</span>
+              <strong id="total-meses" class="money">—</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+
+    <!-- PESTAÑA 2: COTIZADOR VIDATOTAL -->
+    <div id="tab-vidatotal" class="tab-content">
+
+      <!-- Fila 1: Empresa + Producto (fijos, solo informativo) -->
+      <section class="card grid md:grid-cols-2 gap-4 mb-3">
+        <div>
+          <label class="label">Empresa</label>
+          <div class="input w-full bg-gray-50 text-gray-500 cursor-default select-none">STRM</div>
+        </div>
+        <div>
+          <label class="label">Producto</label>
+          <div class="input w-full bg-gray-50 text-gray-500 cursor-default select-none">VidaTotal</div>
+        </div>
+      </section>
+
+      <!-- Fila 2: Género + Condición + Edad -->
+      <section class="card grid md:grid-cols-3 gap-4 mb-3">
+        <div>
+          <label class="label">Género</label>
+          <select id="vt-genero" class="input w-full">
+            <option value="H">Hombre</option>
+            <option value="M">Mujer</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Condición</label>
+          <select id="vt-condicion" class="input w-full">
+            <option value="NFE">No fumador</option>
+            <option value="FE">Fumador</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Edad</label>
+          <input id="vt-edad" type="number" min="15" max="80" value="35" class="input w-full"/>
+          <p class="text-xs text-gray-400 mt-1">Rango válido: 15 – 80 años</p>
+        </div>
+      </section>
+
+      <!-- Fila 3: Suma Asegurada + Pago Mixto -->
+      <section class="card grid md:grid-cols-3 gap-4 mb-3 items-center">
+        <div>
+          <label class="label">Suma Asegurada</label>
+          <input id="vt-sa" type="number" min="300000" max="2500000" step="100000" value="500000" class="input w-full"/>
+          <p class="text-xs text-gray-400 mt-1">$300,000 – $2,500,000</p>
+        </div>
+        <div class="hidden md:block"></div>
+        <div class="hidden md:block"></div>
+      </section>
+
+      <!-- Fila 4: Botón Consultar -->
+      <section class="card mb-4">
+        <button id="vt-btn-consultar" class="btn">Consultar</button>
+        <p id="vt-status" class="text-xs text-red-600 mt-2 hidden"></p>
+      </section>
+
+      <!-- Resultado: Prima Original -->
+      <section id="vt-result-original" class="grid gap-4" style="display:none">
+        <div class="kpi">
+          <div class="flex justify-between primary-row">
+            <span class="primary-label">Prima Total Anual</span>
+            <div class="flex items-center gap-2">
+              <strong id="vt-total-original" class="money primary-amount">—</strong>
+              <span class="badge">TOTAL</span>
+            </div>
+          </div>
+          <div class="flex justify-between mt-1">
+            <span>Prima Semanal <span class="subtle">(anual/48)</span></span>
+            <strong id="vt-semanal-original" class="money">—</strong>
+          </div>
+          <div class="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-400 flex gap-4">
+            <span>Riesgo: <strong id="vt-riesgo-label" class="text-gray-600">—</strong></span>
+            <span>Edad efectiva: <strong id="vt-edad-efectiva-label" class="text-gray-600">—</strong></span>
+            <span>SA: <strong id="vt-sa-label" class="text-gray-600">—</strong></span>
+          </div>
+        </div>
+      </section>
+
+
+    </div>
+
+    <!-- PESTAÑA 3: MENÚS DE SERVICIOS -->
+    <div id="tab-menus" class="tab-content">
+      <div class="ms-nav-ramo" id="ms-ramos"></div>
+      <div class="ms-nav-aseg" id="ms-aseguradoras"></div>
+      <div id="ms-toolbar" style="display:none">
+        <div class="ms-search-wrap">
+          <svg class="ms-search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input id="ms-search" type="text" placeholder="Buscar movimiento…" class="ms-search-bar"/>
+        </div>
+        <div class="ms-filtros" id="ms-filtros"></div>
+      </div>
+      <div id="ms-contenido"></div>
+    </div>
+
+    <!-- PESTAÑA 4: CAMPAÑAS DE EMISIÓN AUTOS -->
+    <div id="tab-campanas" class="tab-content">
+      <div class="ms-nav-ramo" id="camp-empresas"></div>
+      <div class="ms-nav-aseg" id="camp-aseguradoras"></div>
+      <div id="camp-toolbar">
+        <div class="ms-search-wrap">
+          <svg class="ms-search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input id="camp-search" type="text" placeholder="Buscar campaña…" class="ms-search-bar"/>
+        </div>
+        <div class="ms-filtros" id="camp-filtros"></div>
+      </div>
+      <div id="camp-contenido"></div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script>
+    // ============================================
+    // SISTEMA DE PESTAÑAS
+    // ============================================
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.tab;
+        
+        // Activar pestaña
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Mostrar contenido
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(`tab-${targetTab}`).classList.add('active');
+        
+      });
+    });
+
+    // ============================================
+    // COTIZADOR GNP SALUD (PESTAÑA 1)
+    // ============================================
+    // Periodos disponibles por producto — actualizar al cargar nuevos archivos JSON
+    const PERIODOS_DISPONIBLES = {
+      BIMBO:            ['2025-2026', '2026-2027'],
+      STRM_LINEA_AZUL:  ['2025-2026', '2026-2027'],
+      STRM_EXCESOS:     ['2025-2026'],
+      STRM_TRASPASO_RM: ['2025-2026', '2026-2027']
+    };
+
+    function getJsonPaths(periodo) {
+      return {
+        BIMBO:           `pricing/${periodo}/pricing-bimbo-${periodo}.json`,
+        STRM_LINEA_AZUL: `pricing/${periodo}/pricing-strm-${periodo}.json`,
+        STRM_EXCESOS:    `pricing/${periodo}/pricing-strm-excesos-${periodo}.json`,
+        STRM_TRASPASO_RM:`pricing/${periodo}/pricing-t2-rm-${periodo}.json`
+      };
+    }
+
+    // Determina la clave de PERIODOS_DISPONIBLES según contexto
+    function getPeriodosKey(cliente, producto, plan) {
+      if (cliente === 'BIMBO') return 'BIMBO';
+      if (producto === 'EXCESOS') return 'STRM_EXCESOS';
+      if (plan === 'TraspasoRM') return 'STRM_TRASPASO_RM';
+      return 'STRM_LINEA_AZUL';
+    }
+
+    // Periodo más reciente disponible según contexto
+    function periodoActivo(cliente, producto, plan) {
+      const periodos = PERIODOS_DISPONIBLES[getPeriodosKey(cliente, producto, plan)];
+      return periodos[periodos.length - 1];
+    }
+
+    function actualizarAvisoVigencia() {
+      const key = getPeriodosKey($('#cliente').value, $('#producto').value, $('#plan').value);
+      const periodo = $('#vigencia').value;
+      const disponible = PERIODOS_DISPONIBLES[key].includes(periodo);
+      const aviso = $('#vigencia-aviso');
+      if (!disponible) aviso.textContent = `⚠️ Las tarifas para este producto en ${periodo} aún no están disponibles.`;
+      aviso.classList.toggle('hidden', disponible);
+    }
+
+    function sincronizarVigenciaConCliente() {
+      const key = getPeriodosKey($('#cliente').value, $('#producto').value, $('#plan').value);
+      const periodos = PERIODOS_DISPONIBLES[key];
+      $('#vigencia').value = periodos[periodos.length - 1];
+      actualizarAvisoVigencia();
+    }
+
+    const $ = s => document.querySelector(s);
+    const formatMoney = (v) =>
+      new Intl.NumberFormat('es-MX', {style:'currency', currency:'MXN'}).format(Number(v||0));
+
+    function rangoDeEdad(edad) {
+      edad = Number(edad || 0);
+      if (edad < 0) edad = 0;
+      if (edad <= 4) return '00-04';
+      if (edad <= 14) return '05-14';
+      if (edad >= 80) return '80-mas';
+      const start = Math.floor((edad - 15) / 5) * 5 + 15;
+      const end = Math.min(start + 4, 79);
+      return `${String(start).padStart(2, '0')}-${String(end).padStart(2, '0')}`;
+    }
+
+    async function loadJSON(cliente, producto, plan, periodo) {
+      const paths = getJsonPaths(periodo);
+      let key;
+      if (cliente === 'BIMBO') {
+        key = 'BIMBO';
+      } else if (cliente === 'STRM') {
+        if (producto === 'LINEA_AZUL' && plan === 'TraspasoRM') {
+          key = 'STRM_TRASPASO_RM';
+        } else {
+          key = producto === 'EXCESOS' ? 'STRM_EXCESOS' : 'STRM_LINEA_AZUL';
+        }
+      }
+      const url = paths[key];
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Las tarifas de ${cliente} para el periodo ${periodo} aún no están disponibles.`);
+      return await res.json();
+    }
+
+    function describeFetchError(e) {
+      if (e.message === 'Failed to fetch' || e.name === 'TypeError') {
+        return 'No se pudo cargar el archivo de tarifas. Asegúrate de abrir la herramienta desde GitHub Pages o un servidor local, no directamente desde el sistema de archivos.';
+      }
+      return e.message;
+    }
+
+    function calcularBimbo(pricing, genero, edad) {
+      const r = rangoDeEdad(edad);
+      const fila = pricing.tarifas.find(t => t.rango === r);
+      if (!fila) throw new Error('No hay tarifa para el rango ' + r);
+      const valor = genero === 'M' ? fila.M : fila.H;
+      const dec = pricing?.reglas?.redondeo ?? 2;
+      const total = Number(valor.toFixed(dec));
+      const mensual = Number((total / 12).toFixed(dec));
+      const semanal = Number((total / 48).toFixed(dec));
+      const catorcenal = Number((total / 24).toFixed(dec));
+      return { total, mensual, semanal, catorcenal };
+    }
+
+    function calcularStrm(pricing, plan, genero, edad) {
+      const r = rangoDeEdad(edad);
+      const tabla = pricing?.planes?.[plan];
+      if (!Array.isArray(tabla)) throw new Error('Plan inválido para STRM');
+      const fila = tabla.find(t => t.rango === r);
+      if (!fila) throw new Error('No hay tarifa para el rango ' + r);
+      const valor = genero === 'M' ? fila.M : fila.H;
+      const dec = pricing?.reglas?.redondeo ?? 2;
+      const total = Number(valor.toFixed(dec));
+      const mensual = Number((total / 12).toFixed(dec));
+      const semanal = Number((total / 48).toFixed(dec));
+      return { total, mensual, semanal };
+    }
+
+    function toggleProductoYPlan() {
+      const isSTRM = $('#cliente').value === 'STRM';
+      $('#producto-wrap').style.display = isSTRM ? '' : 'none';
+      $('#plan-wrap').style.display = isSTRM ? '' : 'none';
+      $('#pago-mixto-wrap').style.display = isSTRM ? '' : 'none';
+    }
+
+    function buildMesesSelect() {
+      const sel = $('#meses'); sel.innerHTML = '';
+      for (let i=1;i<=12;i++) {
+        const opt = document.createElement('option');
+        opt.value = String(i); opt.textContent = String(i);
+        sel.appendChild(opt);
+      }
+    }
+
+    function actualizarMeses(mensual) {
+      const meses = Number($('#meses').value||'1');
+      $('#meses-label').textContent = meses;
+      const total = Number((mensual * meses).toFixed(2));
+      $('#total-meses').textContent = formatMoney(total);
+    }
+
+    async function consultar() {
+      const btn = $('#btn-consultar'); btn.disabled = true;
+      $('#status').classList.add('hidden');
+      
+      $('#result-original').style.display = 'none';
+      $('#result-adjusted').style.display = 'none';
+      $('#result-mixto').style.display = 'none';
+      $('#meses-wrap').style.display = 'none';
+      
+      try {
+        const cliente = $('#cliente').value;
+        const producto = $('#producto').value;
+        const genero  = $('#genero').value;
+        const edad    = Number($('#edad').value)||0;
+        const extraPrimaPct = Number($('#extraprima').value)||0;
+        const pagoMixto = cliente === 'STRM' && $('#pago-mixto').checked;
+        
+        const plan = cliente === 'STRM' ? $('#plan').value : null;
+        const periodo = $('#vigencia').value;
+        const pricing = await loadJSON(cliente, producto, plan, periodo);
+        let r;
+
+        if (cliente === 'BIMBO') {
+          r = calcularBimbo(pricing, genero, edad);
+        } else {
+          const planKey = plan === 'TraspasoRM' ? 'PlanUnico' : plan;
+          r = calcularStrm(pricing, planKey, genero, edad);
+        }
+        
+        $('#result-original').style.display = '';
+        $('#badge-original').textContent = extraPrimaPct > 0 ? 'ORIGINAL' : 'TOTAL';
+        $('#total-original').textContent = formatMoney(r.total);
+        $('#mensual-original').textContent = formatMoney(r.mensual);
+        
+        if (cliente === 'BIMBO') {
+          $('#row-semanal-original').style.display = '';
+          $('#row-catorcenal-original').style.display = '';
+          $('#semanal-original').textContent = formatMoney(r.semanal);
+          $('#catorcenal-original').textContent = formatMoney(r.catorcenal);
+        } else {
+          $('#row-semanal-original').style.display = '';
+          $('#row-catorcenal-original').style.display = 'none';
+          $('#semanal-original').textContent = formatMoney(r.semanal);
+        }
+        
+        if (extraPrimaPct > 0) {
+          const factor = 1 + (extraPrimaPct / 100);
+          const rAdjusted = {
+            total: Number((r.total * factor).toFixed(2)),
+            mensual: Number((r.mensual * factor).toFixed(2)),
+            semanal: r.semanal ? Number((r.semanal * factor).toFixed(2)) : null,
+            catorcenal: r.catorcenal ? Number((r.catorcenal * factor).toFixed(2)) : null
+          };
+          
+          $('#result-adjusted').style.display = '';
+          $('#badge-adjusted').textContent = `+${extraPrimaPct}%`;
+          $('#total-adjusted').textContent = formatMoney(rAdjusted.total);
+          $('#mensual-adjusted').textContent = formatMoney(rAdjusted.mensual);
+          
+          if (cliente === 'BIMBO') {
+            $('#row-semanal-adjusted').style.display = '';
+            $('#row-catorcenal-adjusted').style.display = '';
+            $('#semanal-adjusted').textContent = formatMoney(rAdjusted.semanal);
+            $('#catorcenal-adjusted').textContent = formatMoney(rAdjusted.catorcenal);
+          } else {
+            $('#row-semanal-adjusted').style.display = '';
+            $('#row-catorcenal-adjusted').style.display = 'none';
+            $('#semanal-adjusted').textContent = formatMoney(rAdjusted.semanal);
+          }
+        }
+        
+        if (pagoMixto) {
+          const totalParaMixto = extraPrimaPct > 0 
+            ? Number((r.total * (1 + extraPrimaPct/100)).toFixed(2))
+            : r.total;
+          
+          const semanal48 = Number((totalParaMixto * 0.70 / 48).toFixed(2));
+          const agosto = Number((totalParaMixto * 0.15).toFixed(2));
+          const diciembre = Number((totalParaMixto * 0.15).toFixed(2));
+          
+          $('#result-mixto').style.display = '';
+          $('#mixto-semanal').textContent = formatMoney(semanal48);
+          $('#mixto-agosto').textContent = formatMoney(agosto);
+          $('#mixto-diciembre').textContent = formatMoney(diciembre);
+        }
+        
+        const mensualParaMeses = extraPrimaPct > 0 
+          ? Number((r.mensual * (1 + extraPrimaPct/100)).toFixed(2))
+          : r.mensual;
+        
+        buildMesesSelect();
+        $('#meses-wrap').style.display = '';
+        $('#meses').value = '12';
+        actualizarMeses(mensualParaMeses);
+        $('#meses').onchange = () => actualizarMeses(mensualParaMeses);
+        
+      } catch (e) {
+        $('#status').textContent = describeFetchError(e);
+        $('#status').classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function toggleTraspasoRM() {
+      const isExcesos = $('#producto').value === 'EXCESOS';
+      const optTraspasoRM = $('#plan').querySelector('option[value="TraspasoRM"]');
+      optTraspasoRM.hidden = isExcesos;
+      if (isExcesos && $('#plan').value === 'TraspasoRM') {
+        $('#plan').value = 'T1';
+      }
+    }
+
+    toggleProductoYPlan();
+    sincronizarVigenciaConCliente();
+    $('#vigencia').addEventListener('change', actualizarAvisoVigencia);
+    $('#cliente').addEventListener('change', () => { toggleProductoYPlan(); sincronizarVigenciaConCliente(); });
+    $('#producto').addEventListener('change', () => { toggleTraspasoRM(); sincronizarVigenciaConCliente(); });
+    $('#plan').addEventListener('change', actualizarAvisoVigencia);
+    $('#btn-consultar').addEventListener('click', consultar);
+
+    // ============================================
+    // COTIZADOR VIDATOTAL (PESTAÑA 2)
+    // ============================================
+
+    // Tabla de tarifas — columna Retarificación (col C del Excel)
+    // Idéntica a VT Cooley 2 en edades 15-41; diverge desde edad 42.
+    // Factor por millar de suma asegurada. Recargo fijo: $180
+    const VT_TARIFAS = {
+      15:5.57,16:5.73,17:5.89,18:6.06,19:6.23,20:6.40,21:6.58,22:6.76,
+      23:6.95,24:7.14,25:7.33,26:7.50,27:7.67,28:7.84,29:8.02,30:8.20,
+      31:8.48,32:8.77,33:9.07,34:9.38,35:9.71,36:10.04,37:10.38,38:10.73,
+      39:11.09,40:11.45,41:11.73,42:12.31,43:12.98,44:13.67,45:14.35,
+      46:15.03,47:15.69,48:16.58,49:17.50,50:18.29,51:19.08,52:19.81,
+      53:20.61,54:21.47,55:22.40,56:23.40,57:24.49,58:25.66,59:26.92,
+      60:28.28,61:29.75,62:31.33,63:33.03,64:34.86,65:36.84,66:38.97,
+      67:41.26,68:43.72,69:46.37,70:49.23,71:52.30,72:55.61,73:59.17,
+      74:62.99,75:67.11,76:71.53,77:76.29,78:81.41,79:86.92,80:92.83
+    };
+    const VT_RECARGO_FIJO = 180;
+    // Ajuste de edad por tipo de riesgo (offset negativo)
+    const VT_OFFSET = { HFE: 0, HNFE: -2, MFE: -3, MNFE: -5 };
+
+    function vtGetRiesgo(genero, condicion) {
+      // genero: 'H'|'M'  condicion: 'FE'|'NFE'
+      return genero + condicion;  // 'HFE' | 'HNFE' | 'MFE' | 'MNFE'
+    }
+
+    function vtCalcular(riesgo, edad, sa) {
+      const edadEfectiva = Math.max(15, edad + VT_OFFSET[riesgo]);
+      const factor = VT_TARIFAS[edadEfectiva];
+      if (!factor) throw new Error(`No hay tarifa para edad efectiva ${edadEfectiva}`);
+      const total    = Number(((factor * sa / 1000) + VT_RECARGO_FIJO).toFixed(2));
+      const mensual  = Number((total / 12).toFixed(2));
+      const semanal  = Number((total / 48).toFixed(2));
+      return { total, mensual, semanal, edadEfectiva };
+    }
+
+    function vtConsultar() {
+      const btn = $('#vt-btn-consultar'); btn.disabled = true;
+      $('#vt-status').classList.add('hidden');
+      $('#vt-result-original').style.display = 'none';
+
+      try {
+        const genero    = $('#vt-genero').value;
+        const condicion = $('#vt-condicion').value;
+        const edad      = Number($('#vt-edad').value) || 0;
+        const sa        = Number($('#vt-sa').value) || 0;
+
+        // Validaciones
+        if (edad < 15 || edad > 80) throw new Error('La edad debe estar entre 15 y 80 años.');
+        if (sa < 300000 || sa > 2500000) throw new Error('La suma asegurada debe estar entre $300,000 y $2,500,000.');
+
+        const riesgo = vtGetRiesgo(genero, condicion);
+        const r = vtCalcular(riesgo, edad, sa);
+
+        // Mostrar resultado
+        $('#vt-result-original').style.display = '';
+        $('#vt-total-original').textContent  = formatMoney(r.total);
+        $('#vt-semanal-original').textContent = formatMoney(r.semanal);
+
+        // Etiquetas informativas
+        const riesgoLabels = { HFE:'Hombre Fumador', HNFE:'Hombre No Fumador', MFE:'Mujer Fumadora', MNFE:'Mujer No Fumadora' };
+        $('#vt-riesgo-label').textContent       = riesgoLabels[riesgo] + ` (${riesgo})`;
+        $('#vt-edad-efectiva-label').textContent = r.edadEfectiva + ' años';
+        $('#vt-sa-label').textContent            = formatMoney(sa);
+
+      } catch (e) {
+        $('#vt-status').textContent = e.message;
+        $('#vt-status').classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    $('#vt-btn-consultar').addEventListener('click', vtConsultar);
+
+    // ============================================
+    // MENÚS DE SERVICIOS (PESTAÑA 3)
+    // ============================================
+
+    // Datos compartidos para todas las aseguradoras de Autos
+    const AUTOS_DATA = [
+      {
+        titulo: 'Emisión',
+        categoria: 'Emisión',
+        diasMCB: 1, slaPorAseg: {GNP:3, ANA:1, Qualitas:1, AXA:7},
+        formatos: [
+          { nombre: 'Carta de declaración de uso particular',                link: 'https://drive.google.com/file/d/1iaWyaAaOVbcD8VY_B5mhZ_BTF2G8iC1p/view?usp=drive_link' },
+          { nombre: 'Carta de Aceptación de Nuevas Condiciones (GNP y Qualitas)', link: 'https://drive.google.com/file/d/1__Jm_w2ZojU2B_EZwyUTp_lz7QDd1exs/view?usp=drive_link' }
+        ],
+        documentos: [
+          'Póliza',
+          'INE vigente',
+          'Comprobante de domicilio (solo si el CP no coincide con la INE)',
+          'Credencial de Empleado / Talón de descuentos',
+          'Factura de la unidad (Residentes) / Carta factura',
+          'Tarjeta de Circulación (Opcional)',
+          'Título y Pedimento (Legalizados)'
+        ],
+        adicional: [],
+        nota: [
+          'Toda emisión sujeta a validación de documentos completos, claros y legibles.',
+          'Enviar archivos en dos PDFs separados.',
+          'Vigencia de cartas: máximo 30 días hábiles.',
+          'Vigencia por valor de factura: 10 días Qualitas, 30 días GNP, 1 año ANA, 3 meses AXA.',
+          'Correcciones durante la emisión conllevan 3 días hábiles adicionales.'
+        ]
+      },
+      {
+        titulo: 'Emisión asistida',
+        categoria: 'Emisión',
+        diasMCB: 1, slaPorAseg: {GNP:3, ANA:1, Qualitas:1, AXA:3},
+        formatos: [
+          { nombre: 'Carta de declaración de uso particular',                link: 'https://drive.google.com/file/d/1iaWyaAaOVbcD8VY_B5mhZ_BTF2G8iC1p/view?usp=drive_link' },
+          { nombre: 'Carta de Aceptación de Nuevas Condiciones (GNP y Qualitas)', link: 'https://drive.google.com/file/d/1__Jm_w2ZojU2B_EZwyUTp_lz7QDd1exs/view?usp=drive_link' }
+        ],
+        documentos: [
+          'Póliza / Archivo de cotización (obligatorio para Emisión Asistida)',
+          'Captura de pantalla del CIANNE (solo GNP)',
+          'INE vigente',
+          'Comprobante de domicilio (solo si no coincide con la INE)',
+          'Credencial de Empleado / Talón de descuentos',
+          'Factura de la unidad (Residentes) / Carta factura',
+          'Tarjeta de Circulación (Opcional)',
+          'Título y Pedimento (Legalizados)'
+        ],
+        adicional: [],
+        nota: [
+          'Aceptar el CIANNE antes de enviar la documentación.',
+          'Adjuntar en 2 archivos PDF separados: (1) documentación a validar + cotización, (2) CIANNE.'
+        ]
+      },
+      {
+        titulo: 'Cancelación',
+        categoria: 'Cancelación',
+        diasMCB: 1, slaPorAseg: {GNP:4, ANA:1, Qualitas:3, AXA:5},
+        formatos: [
+          { nombre: 'Formato de Servicios Asistidos (GNP)',      link: 'https://drive.google.com/drive/folders/1prm4VF4u0E2tXNPejT5vLSvxJDac7vJR?usp=drive_link' },
+          { nombre: 'Orden de trabajo daños (otras aseguradoras)', link: 'https://drive.google.com/drive/folders/1prm4VF4u0E2tXNPejT5vLSvxJDac7vJR?usp=drive_link' }
+        ],
+        documentos: [
+          'Identificación Oficial'
+        ],
+        adicional: [
+          'Carta de Baja de Beneficiario Preferente (solo Caja de Ahorro)'
+        ],
+        nota: [
+          'Marcar la opción de cancelación en el formato.',
+          'Fecha de formatos no mayor a 30 días hábiles.',
+          'Se requiere firma autógrafa (confirmar vigencia con GNP).',
+          'Enviar archivos en PDF.',
+          'Si se requiere endoso de cancelación, indicarlo en la nota del folio — implica 3 días hábiles adicionales.'
+        ]
+      },
+      {
+        titulo: 'Cancelación por fallecimiento',
+        categoria: 'Cancelación',
+        diasMCB: 1, slaPorAseg: {GNP:4, ANA:1, Qualitas:3, AXA:5},
+        formatos: [
+          { nombre: 'Formato de Servicios Asistidos (GNP)',      link: 'https://drive.google.com/drive/folders/1prm4VF4u0E2tXNPejT5vLSvxJDac7vJR?usp=drive_link' },
+          { nombre: 'Orden de trabajo daños (otras aseguradoras)', link: 'https://drive.google.com/drive/folders/1prm4VF4u0E2tXNPejT5vLSvxJDac7vJR?usp=drive_link' }
+        ],
+        documentos: [
+          'Identificación Oficial',
+          'Acta de defunción'
+        ],
+        adicional: [
+          'Carta de Baja de Beneficiario Preferente (solo Caja de Ahorro)'
+        ],
+        nota: [
+          'Marcar la opción de cancelación en el formato.',
+          'Fecha de formatos no mayor a 30 días hábiles.',
+          'Se requiere firma autógrafa (confirmar vigencia con GNP).',
+          'Enviar archivos en PDF.',
+          'Si se requiere endoso de cancelación, indicarlo en la nota del folio — implica 3 días hábiles adicionales.'
+        ]
+      },
+      {
+        titulo: 'Modificación de datos',
+        categoria: 'Modificación de datos',
+        diasMCB: 1, slaPorAseg: {GNP:3, ANA:1, Qualitas:3, AXA:5},
+        formatos: [
+          { nombre: 'Formato de Servicios Asistidos (GNP)',      link: 'https://drive.google.com/drive/folders/1prm4VF4u0E2tXNPejT5vLSvxJDac7vJR?usp=drive_link' },
+          { nombre: 'Orden de trabajo daños (otras aseguradoras)', link: 'https://drive.google.com/drive/folders/1prm4VF4u0E2tXNPejT5vLSvxJDac7vJR?usp=drive_link' }
+        ],
+        documentos: [
+          'Identificación Oficial',
+          'Tarjeta de circulación y/o factura (para endoso de placa, número de serie o motor)',
+          'Carta de finiquito de crédito (para baja o cambio de beneficiario preferente)'
+        ],
+        adicional: [],
+        nota: [
+          'Especificar en el FSA el tipo de modificación requerida.',
+          'Formatos firmados y archivos en PDF.',
+          'Vigencia máxima: 30 días hábiles.',
+          'Para modificación de placas con RC EUA, indicarlo en la nota del folio (puede demorar 3 días hábiles adicionales).'
+        ]
+      },
+      {
+        titulo: 'Endoso económico',
+        categoria: 'Otros movimientos',
+        diasMCB: 1, slaPorAseg: {GNP:null, ANA:1, Qualitas:null, AXA:null},
+        formatos: [
+          { nombre: 'Formato de Servicios Asistidos (GNP)',      link: 'https://drive.google.com/drive/folders/1prm4VF4u0E2tXNPejT5vLSvxJDac7vJR?usp=drive_link' },
+          { nombre: 'Orden de trabajo daños (otras aseguradoras)', link: 'https://drive.google.com/drive/folders/1prm4VF4u0E2tXNPejT5vLSvxJDac7vJR?usp=drive_link' }
+        ],
+        documentos: [
+          'Identificación Oficial'
+        ],
+        adicional: [],
+        nota: [
+          'Aplica para cambios de: CP, coberturas, RFC, forma de pago, contratante, conductor habitual (GNP), entre otros.',
+          'Se debe cancelar y reexpedir.'
+        ]
+      },
+      {
+        titulo: 'Duplicados',
+        categoria: 'Otros movimientos',
+        diasMCB: 1, slaPorAseg: {GNP:null, ANA:null, Qualitas:null, AXA:null},
+        formatos: [],
+        documentos: [],
+        adicional: [],
+        nota: [
+          'Seleccionar en Salesforce el tipo de movimiento como "Duplicados".'
+        ]
+      },
+      {
+        titulo: 'Clave de marca',
+        categoria: 'Otros movimientos',
+        diasMCB: 1, slaPorAseg: {GNP:2, ANA:1, Qualitas:1, AXA:2},
+        formatos: [],
+        documentos: [
+          'Factura / Carta factura'
+        ],
+        adicional: [],
+        nota: [
+          'Seleccionar en Salesforce el tipo de movimiento como "Solicitud de Clave de Marca".'
+        ]
+      }
+    ];
+
+    const MENUS_DATA = {
+      Autos: {
+        ANA:      AUTOS_DATA,
+        AXA:      AUTOS_DATA,
+        GNP:      AUTOS_DATA,
+        Qualitas: AUTOS_DATA
+      },
+      Salud: {
+        GNP: [
+          {
+            titulo: 'Emisión — 1 a 64 años de edad',
+            categoria: 'Emisión',
+            diasMCB: 2, diasAseg: 10,
+            formatos: [
+              { nombre: 'Cuestionario médico',                          link: 'https://drive.google.com/file/d/1CKkWIG8oIjipH01XAPilbOm_-FAHX-L8/view?usp=drive_link' },
+              { nombre: 'Autorización de forma de pago',                link: 'https://drive.google.com/file/d/10DuudFSyE3Y5xTqjuVQ-ylLI_4vfHJsa/view?usp=drive_link' },
+              { nombre: 'Información General, Póliza de Salud',         link: 'https://drive.google.com/file/d/1Ut0MJ5jfDral2LdhFlssRuGCAIFzx-dJ/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Identificación Oficial Vigente',
+              'Credencial de Empleado'
+            ],
+            adicional: [
+              'En caso de enfermedad citada, se recomienda Informe Clínico'
+            ],
+            nota: [
+          'Toda emisión sujeta a selección médica.',
+          'Vigencia del Cuestionario Médico: 60 días naturales.',
+          'En caso de activación, la retroactividad de vigencia se contempla hasta 60 días naturales.'
+        ]
+          },
+          {
+            titulo: 'Emisión — Inclusión de recién nacido (hasta 30 días)',
+            categoria: 'Emisión',
+            diasMCB: 2, diasAseg: 10,
+            formatos: [
+              { nombre: 'Cuestionario médico',                          link: 'https://drive.google.com/file/d/1CKkWIG8oIjipH01XAPilbOm_-FAHX-L8/view?usp=drive_link' },
+              { nombre: 'Autorización de forma de pago',                link: 'https://drive.google.com/file/d/10DuudFSyE3Y5xTqjuVQ-ylLI_4vfHJsa/view?usp=drive_link' },
+              { nombre: 'Información General, Póliza de Salud',         link: 'https://drive.google.com/file/d/1Ut0MJ5jfDral2LdhFlssRuGCAIFzx-dJ/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Identificación Oficial Vigente',
+              'Credencial de Empleado'
+            ],
+            adicional: [
+              'Certificado de Alumbramiento expedido por la Secretaría de Salud de México'
+            ],
+            nota: [
+          'Alta dentro de los primeros 30 días naturales de nacimiento.',
+          'La madre debe estar asegurada en la póliza.',
+          'Vigencia del Cuestionario Médico: 30 días naturales (incluyendo la fecha de nacimiento).'
+        ]
+          },
+          {
+            titulo: 'Emisión — De 31 días a 1 año de edad',
+            categoria: 'Emisión',
+            diasMCB: 2, diasAseg: 10,
+            formatos: [
+              { nombre: 'Cuestionario médico',                          link: 'https://drive.google.com/file/d/1CKkWIG8oIjipH01XAPilbOm_-FAHX-L8/view?usp=drive_link' },
+              { nombre: 'Autorización de forma de pago',                link: 'https://drive.google.com/file/d/10DuudFSyE3Y5xTqjuVQ-ylLI_4vfHJsa/view?usp=drive_link' },
+              { nombre: 'Información General, Póliza de Salud',         link: 'https://drive.google.com/file/d/1Ut0MJ5jfDral2LdhFlssRuGCAIFzx-dJ/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Identificación Oficial Vigente',
+              'Credencial de Empleado'
+            ],
+            adicional: [
+              'Certificado médico expedido por pediatra (talla, peso, semanas de gestación, Apgar, Silvermann y confirmación de ausencia/presencia de malformaciones congénitas)'
+            ],
+            nota: [
+          'Debe estar asociado a un titular (madre y/o padre; en STRM también aplican abuelos por elegibilidad).',
+          'Vigencia del Cuestionario Médico: 60 días naturales.'
+        ]
+          },
+          {
+            titulo: 'Modificación de datos',
+            categoria: 'Modificación de datos',
+            diasMCB: 2, diasAseg: 5,
+            formatos: [
+              { nombre: 'Orden de Trabajo', link: 'https://drive.google.com/file/d/17xTnOoGgJp9_vgUGRFeFmSBojuWznpmH/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Acta de nacimiento o Identificación Oficial Vigente'
+            ],
+            adicional: [],
+            nota: [
+          'El acta de nacimiento o INE del asegurado es necesaria únicamente si se modifica nombre, sexo o fecha de nacimiento.',
+          'Vigencia de la OT: 30 días.'
+        ]
+          },
+          {
+            titulo: 'Constancia de antigüedad',
+            categoria: 'Constancia de antigüedad',
+            diasMCB: 2, diasAseg: 5,
+            formatos: [
+              { nombre: 'Orden de Trabajo', link: 'https://drive.google.com/file/d/17xTnOoGgJp9_vgUGRFeFmSBojuWznpmH/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Identificación Oficial Vigente'
+            ],
+            adicional: [],
+            nota: [
+          'Incluir en la OT el nombre de la persona para quien se solicita la constancia.',
+          'Vigencia de la OT: 30 días.'
+        ]
+          },
+          {
+            titulo: 'Cancelación',
+            categoria: 'Cancelación',
+            diasMCB: 1, diasAseg: 5,
+            formatos: [
+              { nombre: 'Orden de Trabajo', link: 'https://drive.google.com/file/d/17xTnOoGgJp9_vgUGRFeFmSBojuWznpmH/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Identificación Oficial Vigente',            ],
+            adicional: [
+              'FSA vigente y firmado (solo si es baja a petición)',
+              'Acta de defunción (solo en caso de fallecimiento)'
+            ],
+            nota: [
+          'Especificar todos los números de certificados en la OT; se requiere una OT por endoso.',
+          'En caso de fallecimiento, mencionarlo en la OT.',
+          'El endoso de baja se comparte solo si es requerido.',
+          'Vigencia de la OT: 30 días.'
+        ]
+          },
+          {
+            titulo: 'Cambio de forma de pago',
+            categoria: 'Otros movimientos',
+            diasMCB: 2, diasAseg: 10,
+            formatos: [
+              { nombre: 'Orden de Trabajo', link: 'https://drive.google.com/file/d/17xTnOoGgJp9_vgUGRFeFmSBojuWznpmH/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Identificación Oficial Vigente'
+            ],
+            adicional: [],
+            nota: [
+          'Especificar en la OT la forma de pago actual y la nueva.',
+          'Vigencia de la OT: 30 días.'
+        ]
+          },
+          {
+            titulo: 'Cambio de contratante',
+            categoria: 'Otros movimientos',
+            diasMCB: 2, diasAseg: 10,
+            formatos: [
+              { nombre: 'Orden de Trabajo', link: 'https://drive.google.com/file/d/17xTnOoGgJp9_vgUGRFeFmSBojuWznpmH/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Identificación Oficial Vigente — Contratante actual',
+              'Identificación Oficial Vigente — Nuevo contratante',
+              'Credencial de Empleado vigente — Contratante actual',
+              'Credencial de Empleado vigente — Nuevo contratante'
+            ],
+            adicional: [],
+            nota: [
+          'Especificar el expediente de origen y destino en la OT.',
+          'Incluir datos fiscales del nuevo contratante: RFC, Régimen Fiscal y Código Postal fiscal.',
+          'Vigencia de la OT: 30 días.'
+        ]
+          },
+          {
+            titulo: 'Cambio de contratante por fallecimiento',
+            categoria: 'Otros movimientos',
+            diasMCB: 2, diasAseg: 10,
+            formatos: [
+              { nombre: 'Orden de Trabajo', link: 'https://drive.google.com/file/d/17xTnOoGgJp9_vgUGRFeFmSBojuWznpmH/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Identificación Oficial Vigente — Contratante actual',
+              'Identificación Oficial Vigente — Nuevo contratante',
+              'Credencial de Empleado vigente — Nuevo contratante',
+              'Acta de defunción'
+            ],
+            adicional: [],
+            nota: [
+          'La credencial de empleado del nuevo contratante no es necesaria si no pertenece al STRM y es familiar directo del fallecido.',
+          'Especificar el expediente de origen y destino, RFC, Régimen Fiscal y Código Postal fiscal en la OT.',
+          'Vigencia de la OT: 30 días.'
+        ]
+          },
+          {
+            titulo: 'Rehabilitación',
+            categoria: 'Otros movimientos',
+            diasMCB: 2, diasAseg: 20,
+            formatos: [
+              { nombre: 'Orden de Trabajo', link: 'https://drive.google.com/file/d/17xTnOoGgJp9_vgUGRFeFmSBojuWznpmH/view?usp=drive_link' }
+            ],
+            documentos: [
+              'Identificación Oficial Vigente',
+              'Credencial de Empleado'
+            ],
+            adicional: [
+              'Comprobante de pago o incapacidad por Sector Público (según aplique)'
+            ],
+            nota: [
+          'Identificar el motivo de la rehabilitación en la OT y especificar "no siniestro".',
+          'Incapacidad no reportada: adjuntar documento de incapacidad emitido por el IMSS.',
+          'Pagos no identificados: enviar comprobante de pago a GNP para validación y rastreo.',
+          'Vigencia de la OT: 30 días.'
+        ]
+          }
+        ]
+      },
+      Vida: {
+        VidaTotal:  null,
+        'VidaMás':  null,
+        Inbursa:    null,
+        Prismatel:  null
+      },
+      Hogar: {
+        GMX: null
+      }
+    };
+
+    function msNotaHTML(nota) {
+      if (!nota || !nota.length) return '';
+      const items = Array.isArray(nota) ? nota : [nota];
+      return `<div class="ms-note">
+        <div class="ms-note-label">Nota importante</div>
+        <ul>${items.map(item => `<li>${item}</li>`).join('')}</ul>
+      </div>`;
+    }
+
+    function msBadgesSLA(mov) {
+      const fmtDias = n => n == null ? 'N/A' : `${n} ${n === 1 ? 'día' : 'días'}`;
+      const mcbLabel  = `MCBrokers: ${fmtDias(mov.diasMCB)}`;
+      let asegLabel;
+      if (mov.slaPorAseg) {
+        if (msAsegActiva === 'Todas') {
+          const vals = Object.values(mov.slaPorAseg).filter(v => v != null);
+          if (!vals.length) { asegLabel = 'Aseguradora: N/A'; }
+          else {
+            const min = Math.min(...vals), max = Math.max(...vals);
+            asegLabel = min === max ? `Aseguradora: ${fmtDias(min)}` : `Aseguradora: ${min}–${max} días`;
+          }
+        } else {
+          asegLabel = `Aseguradora: ${fmtDias(mov.slaPorAseg[msAsegActiva] ?? null)}`;
+        }
+      } else {
+        asegLabel = `Aseguradora: ${fmtDias(mov.diasAseg)}`;
+      }
+      return `<div class="ms-sla-badges"><span class="ms-badge-mcb">${mcbLabel}</span><span class="ms-badge-aseg">${asegLabel}</span></div>`;
+    }
+
+    let msRamoActivo   = 'Salud';
+    let msAsegActiva   = 'GNP';
+    let msFiltroActivo = 'Todos';
+    let msBusqueda     = '';
+
+    function msGetCategorias(data) {
+      if (!data) return [];
+      return [...new Set(data.map(m => m.categoria))];
+    }
+
+    function msRenderRamos() {
+      const cont = document.getElementById('ms-ramos');
+      cont.innerHTML = '';
+      Object.keys(MENUS_DATA).forEach(ramo => {
+        const el = document.createElement('div');
+        el.className = 'ms-tab-ramo' + (ramo === msRamoActivo ? ' active' : '');
+        el.textContent = ramo;
+        el.addEventListener('click', () => {
+          msRamoActivo   = ramo;
+          msAsegActiva   = Object.keys(MENUS_DATA[ramo])[0];
+          msFiltroActivo = 'Todos';
+          msBusqueda     = '';
+          if (document.getElementById('ms-search')) document.getElementById('ms-search').value = '';
+          msRenderRamos();
+          msRenderAseguradoras();
+          msRenderToolbar();
+          msRenderContenido();
+        });
+        cont.appendChild(el);
+      });
+    }
+
+    function msRenderAseguradoras() {
+      const cont = document.getElementById('ms-aseguradoras');
+      cont.innerHTML = '';
+      Object.keys(MENUS_DATA[msRamoActivo]).forEach(aseg => {
+        const el = document.createElement('div');
+        el.className = 'ms-pill-aseg' + (aseg === msAsegActiva ? ' active' : '');
+        el.textContent = aseg;
+        el.addEventListener('click', () => {
+          msAsegActiva   = aseg;
+          msFiltroActivo = 'Todos';
+          msBusqueda     = '';
+          if (document.getElementById('ms-search')) document.getElementById('ms-search').value = '';
+          msRenderAseguradoras();
+          msRenderToolbar();
+          msRenderContenido();
+        });
+        cont.appendChild(el);
+      });
+    }
+
+    function msRenderToolbar() {
+      const data    = MENUS_DATA[msRamoActivo][msAsegActiva];
+      const toolbar = document.getElementById('ms-toolbar');
+      const filtros = document.getElementById('ms-filtros');
+      if (!data) { toolbar.style.display = 'none'; return; }
+
+      toolbar.style.display = '';
+      const cats = msGetCategorias(data);
+      filtros.innerHTML = '';
+      ['Todos', ...cats].forEach(cat => {
+        const el = document.createElement('div');
+        el.className = 'ms-filtro-pill' + (cat === msFiltroActivo ? ' active' : '');
+        el.textContent = cat;
+        el.addEventListener('click', () => {
+          msFiltroActivo = cat;
+          msRenderToolbar();
+          msRenderContenido();
+        });
+        filtros.appendChild(el);
+      });
+
+      document.getElementById('ms-search').addEventListener('input', e => {
+        msBusqueda = e.target.value.toLowerCase();
+        msRenderContenido();
+      });
+    }
+
+    function msIconDoc() {
+      return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+    }
+
+    function msRenderContenido() {
+      const cont = document.getElementById('ms-contenido');
+      const data = MENUS_DATA[msRamoActivo][msAsegActiva];
+
+      if (!data) {
+        cont.innerHTML = `
+          <div class="ms-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto .75rem;display:block;opacity:.3"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <p>El menú de servicios para <strong>${msAsegActiva}</strong> estará disponible próximamente.</p>
+          </div>`;
+        return;
+      }
+
+      const filtrados = data.filter(mov => {
+        const matchFiltro = msFiltroActivo === 'Todos' ||
+          mov.categoria === msFiltroActivo;
+        const matchBusq = !msBusqueda || mov.titulo.toLowerCase().includes(msBusqueda);
+        return matchFiltro && matchBusq;
+      });
+
+      if (!filtrados.length) {
+        cont.innerHTML = `<div class="ms-sin-resultados">No hay movimientos que coincidan con la búsqueda.</div>`;
+        return;
+      }
+
+      cont.innerHTML = filtrados.map(mov => {
+        const tieneAdicional = mov.adicional && mov.adicional.length > 0;
+
+        const formatosHTML = mov.formatos.map(f =>
+          f.link
+            ? `<div class="ms-doc-item">${msIconDoc()}<a class="ms-formato-link" href="${f.link}" target="_blank" rel="noopener">${f.nombre}</a></div>`
+            : `<div class="ms-doc-item">${msIconDoc()}<span>${f.nombre}</span></div>`
+        ).join('');
+
+        const documentosHTML = mov.documentos.map(d =>
+          `<div class="ms-doc-item">${msIconDoc()}<span>${d}</span></div>`
+        ).join('');
+
+        const adicionalHTML = tieneAdicional ? `
+          <div style="margin-top:.6rem">
+            <span class="ms-tag ms-tag-adic">Adicional si aplica</span>
+            ${mov.adicional.map(a => `<div class="ms-doc-item">${msIconDoc()}<span>${a}</span></div>`).join('')}
+          </div>` : '';
+
+        const notaHTML = msNotaHTML(mov.nota);
+
+        return `
+          <div class="ms-card">
+            <div class="ms-card-header">
+              <div class="ms-card-title">${mov.titulo}</div>
+              ${msBadgesSLA(mov)}
+            </div>
+            <div class="ms-card-body">
+              <div>
+                <p class="ms-section-label">Documentación requerida</p>
+                <div style="margin-bottom:.4rem"><span class="ms-tag ms-tag-formato">Formatos</span></div>
+                ${formatosHTML}
+                <div style="margin-top:.6rem;margin-bottom:.4rem"><span class="ms-tag ms-tag-doc">Documentos</span></div>
+                ${documentosHTML}
+                ${adicionalHTML}
+              </div>
+              <div>
+                ${notaHTML}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Inicializar al entrar a la pestaña por primera vez
+    document.querySelectorAll('.tab').forEach(tab => {
+      if (tab.dataset.tab === 'menus') {
+        tab.addEventListener('click', () => {
+          if (!document.getElementById('ms-ramos').children.length) {
+            msRenderRamos();
+            msRenderAseguradoras();
+            msRenderToolbar();
+            msRenderContenido();
+          }
+        });
+      }
+    });
+
+    // ============================================
+    // CAMPAÑAS DE EMISIÓN AUTOS (PESTAÑA 4)
+    // ============================================
+    
+    // Variables globales para datos
+    const CAMPANAS_DATA = [{"empresa":"Caja de Ahorro","aseguradora":"ANA","via_pago":"DxN","periodicidad":"Quincenal","campana":"CAJA_ANA COR_CONF","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"ANA","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"CAJA_ANA COR_CONTA","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"ANA","via_pago":"DxN","periodicidad":"Semanal","campana":"CAJA_ANA COR_SIND","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"ANA","via_pago":"DxN","periodicidad":"Quincenal","campana":"CAJA_CREDIANA_CONF","credito_caja":"Sí","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"ANA","via_pago":"DxN","periodicidad":"Semanal","campana":"CAJA_CREDIANA_SIND","credito_caja":"Sí","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"ANA","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"CAJA_CREADIANA_CONT","credito_caja":"Sí","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"ANA","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"ANA COR CAJA CONTADO","credito_caja":"Sí","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"GNP","via_pago":"DxN","periodicidad":"Quincenal","campana":"CAJA_AUTOMAS_CONF","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"GNP","via_pago":"DxN","periodicidad":"Semanal","campana":"CAJA_AUTOMAS_SIND","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"GNP","via_pago":"DxN","periodicidad":"Quincenal","campana":"CAJA_CREDIMAS_CONF","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"GNP","via_pago":"DxN","periodicidad":"Semanal","campana":"CAJA_CREDIMAS_SIND","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"CAJA_AUTOMAS_CONTA","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"CAJA_CREDIMAS_CONT","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"Qualitas","via_pago":"DxN","periodicidad":"Quincenal","campana":"QUALITAS CAJA CONF","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"Qualitas","via_pago":"DxN","periodicidad":"Semanal","campana":"QUALITAS CAJA SEM","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"Caja de Ahorro","aseguradora":"Qualitas","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"QUALITAS CAJA CONTAD","credito_caja":"No","digitos_expediente":"5 dígitos"},{"empresa":"CTBR","aseguradora":"ANA","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"ANA COR_BTR_CONT","credito_caja":"No","digitos_expediente":"8 dígitos"},{"empresa":"CTBR","aseguradora":"GNP","via_pago":"DxN","periodicidad":"Semanal","campana":"AUTOMAS _BTR","credito_caja":"No","digitos_expediente":"8 dígitos"},{"empresa":"CTBR","aseguradora":"GNP","via_pago":"DxN","periodicidad":"Semanal","campana":"AUTOMAS CAJA BTR NOM","credito_caja":"Sí","digitos_expediente":"8 dígitos"},{"empresa":"CTBR","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTOMAS_BTR_CONTADO","credito_caja":"No","digitos_expediente":"8 dígitos"},{"empresa":"CTBR","aseguradora":"Qualitas","via_pago":"DxN","periodicidad":"Semanal","campana":"BTR QUALITAS NOMINA","credito_caja":"No","digitos_expediente":"8 dígitos"},{"empresa":"CTBR","aseguradora":"Qualitas","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"BTR QUALITAS CONTADO","credito_caja":"No","digitos_expediente":"8 dígitos"},{"empresa":"Empleados de STRM","aseguradora":"GNP","via_pago":"DxN","periodicidad":"Semanal","campana":"AUTOMAS_EMP_STRM","credito_caja":"No","digitos_expediente":"6 dígitos"},{"empresa":"Empleados de STRM","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTOMAS_STRM_CONTADO","credito_caja":"No","digitos_expediente":"6 dígitos"},{"empresa":"Empleados de STRM","aseguradora":"Qualitas","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"QUALITAS_STRM_CONTAD","credito_caja":"No","digitos_expediente":"6 dígitos"},{"empresa":"MCB","aseguradora":"ANA","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"ANA_CONTADO_FAM","credito_caja":"No","digitos_expediente":"RFC sin homoclave"},{"empresa":"MCB","aseguradora":"ANA","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"ANA COR MAC","credito_caja":"No","digitos_expediente":"RFC sin homoclave"},{"empresa":"MCB","aseguradora":"ANA","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"ANA COR MAC CAJA","credito_caja":"Sí","digitos_expediente":"RFC sin homoclave"},{"empresa":"MCB","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTOMAS CONTADO FAM","credito_caja":"No","digitos_expediente":"RFC sin homoclave"},{"empresa":"MCB","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTOMAS MAC","credito_caja":"No","digitos_expediente":"RFC sin homoclave"},{"empresa":"MCB","aseguradora":"Qualitas","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTO QUALITAS MAC","credito_caja":"No","digitos_expediente":"RFC sin homoclave"},{"empresa":"MCB","aseguradora":"Qualitas","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"QUALITAS CONTADO","credito_caja":"No","digitos_expediente":"RFC sin homoclave"},{"empresa":"STRM","aseguradora":"ANA","via_pago":"DxN","periodicidad":"Semanal","campana":"ANA COR","credito_caja":"No","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"ANA","via_pago":"DxN","periodicidad":"Semanal","campana":"ANA COR CAJA NOMINA","credito_caja":"Sí","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"ANA","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"ANA COR_CONTADO","credito_caja":"No","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"GNP","via_pago":"DxN","periodicidad":"Semanal","campana":"AUTOMAS","credito_caja":"No","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"GNP","via_pago":"DxN","periodicidad":"Semanal","campana":"AUTOMAS CAJA NOMINA","credito_caja":"Sí","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTOMAS _CONTADO","credito_caja":"No","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTOMAS CAJA CONTADO","credito_caja":"Sí","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTOMAS_CONTADO","credito_caja":"No","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"Qualitas","via_pago":"DxN","periodicidad":"Semanal","campana":"AUTOQUALITAS","credito_caja":"No","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"Qualitas","via_pago":"DxN","periodicidad":"Semanal","campana":"AUTQUALITAS CAJA NOM","credito_caja":"Sí","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"Qualitas","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTO QUALITAS CONTADO","credito_caja":"No","digitos_expediente":"7 dígitos"},{"empresa":"STRM","aseguradora":"Qualitas","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"QUALITAS CAJA CONTADO","credito_caja":"Sí","digitos_expediente":"7 dígitos"},{"empresa":"Tecmarketing","aseguradora":"GNP","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"AUTOMAS TEC","credito_caja":"No","digitos_expediente":"8 dígitos"},{"empresa":"Tecmarketing","aseguradora":"Qualitas","via_pago":"Pago Bancario","periodicidad":"Mensual / Anual","campana":"QUALITAS TEC","credito_caja":"No","digitos_expediente":"8 dígitos"}];
+    const EJEMPLOS_EXPEDIENTES = {"STRM":["7928761","0008882"],"Caja de Ahorro":["00302","00127"],"CTBR":["24006234","24000158"],"Empleados de STRM":["199818","202342"],"MCB":["AURL970831","MAAJ550823"],"Tecmarketing":["23000412","23001729"]};
+    fetch('./data/ejemplos-expedientes.json').then(r=>r.ok?r.json():null).then(d=>{if(d)Object.assign(EJEMPLOS_EXPEDIENTES,d)}).catch(()=>{});
+
+
+    let campEmpresaActiva = 'STRM';
+    let campAsegActiva    = 'Todas';
+    let campFiltroActivo  = 'Todas';
+    let campBusqueda      = '';
+
+    function campGetEmpresas() {
+      return [...new Set(CAMPANAS_DATA.map(c => c.empresa))].sort((a, b) => a.localeCompare(b, 'es'));
+    }
+
+    function campGetAseguradoras(empresa) {
+      const data = CAMPANAS_DATA.filter(c => c.empresa === empresa);
+      return ['Todas', ...[...new Set(data.map(c => c.aseguradora))].sort()];
+    }
+
+    function campGetPeriodicidades(empresa, aseg) {
+      let data = CAMPANAS_DATA.filter(c => c.empresa === empresa);
+      if (aseg !== 'Todas') data = data.filter(c => c.aseguradora === aseg);
+      return [...new Set(data.map(c => c.periodicidad))].sort();
+    }
+
+    function campGetFiltered() {
+      return CAMPANAS_DATA
+        .filter(c => {
+          const matchEmp    = c.empresa === campEmpresaActiva;
+          const matchAseg   = campAsegActiva   === 'Todas' || c.aseguradora === campAsegActiva;
+          const matchPer    = campFiltroActivo === 'Todas' || c.periodicidad === campFiltroActivo;
+          const matchSearch = !campBusqueda || c.campana.toLowerCase().includes(campBusqueda);
+          return matchEmp && matchAseg && matchPer && matchSearch;
+        })
+        .sort((a, b) => a.campana.localeCompare(b.campana));
+    }
+
+    function campRenderEmpresas() {
+      const cont = document.getElementById('camp-empresas');
+      cont.innerHTML = '';
+      campGetEmpresas().forEach(emp => {
+        const el = document.createElement('div');
+        el.className = 'ms-tab-ramo' + (emp === campEmpresaActiva ? ' active' : '');
+        el.textContent = emp;
+        el.addEventListener('click', () => {
+          campEmpresaActiva = emp;
+          campAsegActiva    = 'Todas';
+          campFiltroActivo  = 'Todas';
+          campBusqueda      = '';
+          document.getElementById('camp-search').value = '';
+          campRenderEmpresas();
+          campRenderAseguradoras();
+          campRenderToolbar();
+          campRenderContenido();
+        });
+        cont.appendChild(el);
+      });
+    }
+
+    function campRenderAseguradoras() {
+      const cont = document.getElementById('camp-aseguradoras');
+      cont.innerHTML = '';
+      campGetAseguradoras(campEmpresaActiva).forEach(aseg => {
+        const el = document.createElement('div');
+        el.className = 'ms-pill-aseg' + (aseg === campAsegActiva ? ' active' : '');
+        el.textContent = aseg;
+        el.addEventListener('click', () => {
+          campAsegActiva   = aseg;
+          campFiltroActivo = 'Todas';
+          campRenderAseguradoras();
+          campRenderToolbar();
+          campRenderContenido();
+        });
+        cont.appendChild(el);
+      });
+    }
+
+    function campRenderToolbar() {
+      const filtros = document.getElementById('camp-filtros');
+      filtros.innerHTML = '';
+      ['Todas', ...campGetPeriodicidades(campEmpresaActiva, campAsegActiva)].forEach(per => {
+        const el = document.createElement('div');
+        el.className = 'ms-filtro-pill' + (per === campFiltroActivo ? ' active' : '');
+        el.textContent = per;
+        el.addEventListener('click', () => {
+          campFiltroActivo = per;
+          campRenderToolbar();
+          campRenderContenido();
+        });
+        filtros.appendChild(el);
+      });
+      document.getElementById('camp-search').oninput = e => {
+        campBusqueda = e.target.value.toLowerCase();
+        campRenderContenido();
+      };
+    }
+
+    function campRenderContenido() {
+      const cont     = document.getElementById('camp-contenido');
+      const filtered = campGetFiltered();
+
+      if (!filtered.length) {
+        cont.innerHTML = '<div class="ms-sin-resultados">No hay campañas que coincidan con la búsqueda.</div>';
+        return;
+      }
+
+      cont.innerHTML = filtered.map(c => {
+        const ejemplos = EJEMPLOS_EXPEDIENTES[c.empresa] || [];
+        const ejHTML   = ejemplos.length
+          ? `<div class="camp-ejemplos">Ej. expediente: ${ejemplos.join(' · ')}</div>`
+          : '';
+        const creditoBadge = c.credito_caja === 'Sí'
+          ? '<span class="camp-credito">Crédito Caja</span>'
+          : '';
+
+        return `
+          <div class="ms-card">
+            <div class="ms-card-header" style="align-items:center">
+              <div class="camp-nombre">${c.campana}${creditoBadge}</div>
+              <span class="ms-badge-total camp-badge-per">${c.periodicidad}</span>
+            </div>
+            <div class="camp-meta">
+              <span>Vía de pago: <strong>${c.via_pago}</strong></span>
+              <span>Expediente: <strong>${c.digitos_expediente}</strong></span>
+            </div>
+            ${ejHTML}
+            <div style="margin-top:.75rem">
+              <button class="copy-btn" onclick="this.textContent='✓ Copiado';this.classList.add('copied');navigator.clipboard.writeText('${c.campana.replace(/'/g,"\'")}');setTimeout(()=>{this.textContent='Copiar código';this.classList.remove('copied')},2000)">Copiar código</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      if (tab.dataset.tab === 'campanas') {
+        tab.addEventListener('click', () => {
+          if (!document.getElementById('camp-empresas').children.length) {
+            campRenderEmpresas();
+            campRenderAseguradoras();
+            campRenderToolbar();
+            campRenderContenido();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

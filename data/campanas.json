@@ -1,0 +1,416 @@
+[
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "ANA",
+    "via_pago": "DxN",
+    "periodicidad": "Quincenal",
+    "campana": "CAJA_ANA COR_CONF",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "ANA",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "CAJA_ANA COR_CONTA",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "ANA",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "CAJA_ANA COR_SIND",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "ANA",
+    "via_pago": "DxN",
+    "periodicidad": "Quincenal",
+    "campana": "CAJA_CREDIANA_CONF",
+    "credito_caja": "Sí",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "ANA",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "CAJA_CREDIANA_SIND",
+    "credito_caja": "Sí",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "ANA",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "CAJA_CREADIANA_CONT",
+    "credito_caja": "Sí",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "ANA",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "ANA COR CAJA CONTADO",
+    "credito_caja": "Sí",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "GNP",
+    "via_pago": "DxN",
+    "periodicidad": "Quincenal",
+    "campana": "CAJA_AUTOMAS_CONF",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "GNP",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "CAJA_AUTOMAS_SIND",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "GNP",
+    "via_pago": "DxN",
+    "periodicidad": "Quincenal",
+    "campana": "CAJA_CREDIMAS_CONF",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "GNP",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "CAJA_CREDIMAS_SIND",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "CAJA_AUTOMAS_CONTA",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "CAJA_CREDIMAS_CONT",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "Qualitas",
+    "via_pago": "DxN",
+    "periodicidad": "Quincenal",
+    "campana": "QUALITAS CAJA CONF",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "Qualitas",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "QUALITAS CAJA SEM",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "Caja de Ahorro",
+    "aseguradora": "Qualitas",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "QUALITAS CAJA CONTAD",
+    "credito_caja": "No",
+    "digitos_expediente": "5 dígitos"
+  },
+  {
+    "empresa": "CTBR",
+    "aseguradora": "ANA",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "ANA COR_BTR_CONT",
+    "credito_caja": "No",
+    "digitos_expediente": "8 dígitos"
+  },
+  {
+    "empresa": "CTBR",
+    "aseguradora": "GNP",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "AUTOMAS _BTR",
+    "credito_caja": "No",
+    "digitos_expediente": "8 dígitos"
+  },
+  {
+    "empresa": "CTBR",
+    "aseguradora": "GNP",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "AUTOMAS CAJA BTR NOM",
+    "credito_caja": "Sí",
+    "digitos_expediente": "8 dígitos"
+  },
+  {
+    "empresa": "CTBR",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTOMAS_BTR_CONTADO",
+    "credito_caja": "No",
+    "digitos_expediente": "8 dígitos"
+  },
+  {
+    "empresa": "CTBR",
+    "aseguradora": "Qualitas",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "BTR QUALITAS NOMINA",
+    "credito_caja": "No",
+    "digitos_expediente": "8 dígitos"
+  },
+  {
+    "empresa": "CTBR",
+    "aseguradora": "Qualitas",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "BTR QUALITAS CONTADO",
+    "credito_caja": "No",
+    "digitos_expediente": "8 dígitos"
+  },
+  {
+    "empresa": "Empleados de STRM",
+    "aseguradora": "GNP",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "AUTOMAS_EMP_STRM",
+    "credito_caja": "No",
+    "digitos_expediente": "6 dígitos"
+  },
+  {
+    "empresa": "Empleados de STRM",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTOMAS_STRM_CONTADO",
+    "credito_caja": "No",
+    "digitos_expediente": "6 dígitos"
+  },
+  {
+    "empresa": "Empleados de STRM",
+    "aseguradora": "Qualitas",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "QUALITAS_STRM_CONTAD",
+    "credito_caja": "No",
+    "digitos_expediente": "6 dígitos"
+  },
+  {
+    "empresa": "MCB",
+    "aseguradora": "ANA",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "ANA_CONTADO_FAM",
+    "credito_caja": "No",
+    "digitos_expediente": "RFC sin homoclave"
+  },
+  {
+    "empresa": "MCB",
+    "aseguradora": "ANA",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "ANA COR MAC",
+    "credito_caja": "No",
+    "digitos_expediente": "RFC sin homoclave"
+  },
+  {
+    "empresa": "MCB",
+    "aseguradora": "ANA",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "ANA COR MAC CAJA",
+    "credito_caja": "Sí",
+    "digitos_expediente": "RFC sin homoclave"
+  },
+  {
+    "empresa": "MCB",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTOMAS CONTADO FAM",
+    "credito_caja": "No",
+    "digitos_expediente": "RFC sin homoclave"
+  },
+  {
+    "empresa": "MCB",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTOMAS MAC",
+    "credito_caja": "No",
+    "digitos_expediente": "RFC sin homoclave"
+  },
+  {
+    "empresa": "MCB",
+    "aseguradora": "Qualitas",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTO QUALITAS MAC",
+    "credito_caja": "No",
+    "digitos_expediente": "RFC sin homoclave"
+  },
+  {
+    "empresa": "MCB",
+    "aseguradora": "Qualitas",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "QUALITAS CONTADO",
+    "credito_caja": "No",
+    "digitos_expediente": "RFC sin homoclave"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "ANA",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "ANA COR",
+    "credito_caja": "No",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "ANA",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "ANA COR CAJA NOMINA",
+    "credito_caja": "Sí",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "ANA",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "ANA COR_CONTADO",
+    "credito_caja": "No",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "GNP",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "AUTOMAS",
+    "credito_caja": "No",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "GNP",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "AUTOMAS CAJA NOMINA",
+    "credito_caja": "Sí",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTOMAS _CONTADO",
+    "credito_caja": "No",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTOMAS CAJA CONTADO",
+    "credito_caja": "Sí",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTOMAS_CONTADO",
+    "credito_caja": "No",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "Qualitas",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "AUTOQUALITAS",
+    "credito_caja": "No",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "Qualitas",
+    "via_pago": "DxN",
+    "periodicidad": "Semanal",
+    "campana": "AUTQUALITAS CAJA NOM",
+    "credito_caja": "Sí",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "Qualitas",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTO QUALITAS CONTADO",
+    "credito_caja": "No",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "STRM",
+    "aseguradora": "Qualitas",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "QUALITAS CAJA CONTADO",
+    "credito_caja": "Sí",
+    "digitos_expediente": "7 dígitos"
+  },
+  {
+    "empresa": "Tecmarketing",
+    "aseguradora": "GNP",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "AUTOMAS TEC",
+    "credito_caja": "No",
+    "digitos_expediente": "8 dígitos"
+  },
+  {
+    "empresa": "Tecmarketing",
+    "aseguradora": "Qualitas",
+    "via_pago": "Pago Bancario",
+    "periodicidad": "Mensual / Anual",
+    "campana": "QUALITAS TEC",
+    "credito_caja": "No",
+    "digitos_expediente": "8 dígitos"
+  }
+]
