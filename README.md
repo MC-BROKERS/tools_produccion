@@ -25,7 +25,8 @@ proyecto/
     │   └── pricing-t2-rm-2025-2026.json
     └── 2026-2027/
         ├── pricing-bimbo-2026-2027.json
-        └── pricing-strm-2026-2027.json
+        ├── pricing-strm-2026-2027.json
+        └── pricing-strm-excesos-2026-2027.json
 ```
 
 ## 🚀 Uso
@@ -121,7 +122,6 @@ Edita `data/ejemplos-expedientes.json`:
 
 ## 🔧 Pendientes conocidos
 
-- Agregar `pricing-strm-excesos-2026-2027.json` cuando esté disponible y habilitar el periodo en `PERIODOS_DISPONIBLES`
 - Agregar `pricing-t2-rm-2026-2027.json` cuando esté disponible
 
 ---
