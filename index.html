@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MCBrokers — Herramientas Internas</title>
-  <meta name="theme-color" content="#0057A4" />
+  <title>MCBrokers · Herramientas de producción</title>
+  <meta name="theme-color" content="#0052A1" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" href="./assets/app-icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="./assets/Logo_Colores_MCB.png" />
+  <link rel="icon" href="./assets/app-icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
   <script src="./assets/tailwind-3.4.17.js"></script>
   <style>
     :root{
@@ -201,33 +201,61 @@
       header h1{font-size:1.1rem;line-height:1.25}
     }
   </style>
+  <link rel="stylesheet" href="./assets/mcb-tokens.css" />
+  <link rel="stylesheet" href="./assets/app-ui.css" />
 </head>
 <body>
-  <div class="container mx-auto p-4">
-    <header class="mb-5">
-      <div class="brand">
+  <div class="app-shell">
+    <header class="app-header">
+      <a class="brand" href="./" aria-label="Herramientas MCBrokers, inicio">
         <img src="assets/Logo_Colores_MCB.png" alt="MCBrokers" />
-        <div>
-          <h1 class="text-2xl font-semibold">Herramientas Internas MCBrokers</h1>
-        </div>
+        <span class="brand-name">Herramientas<br><span>de producción</span></span>
+      </a>
+      <div class="header-tools" aria-label="Estado del dispositivo">
+        <button id="connection-status" class="header-control connection-status" type="button" aria-haspopup="dialog" aria-controls="offline-info" title="Conexión que detecta el dispositivo. La descarga se confirma por separado.">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a15 15 0 0 1 18 0M6 12a10 10 0 0 1 12 0M9 16a5 5 0 0 1 6 0M12 20h.01"/></svg>
+          <span id="connection-label" role="status" aria-live="polite">Con conexión</span>
+        </button>
+        <button id="offline-summary" class="header-control offline-status" data-state="checking" type="button" aria-haspopup="dialog" aria-controls="offline-info" aria-describedby="download-message">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h10l3 3v15H5V3h1Z"/><path class="status-ready" d="m8 12 3 3 5-6"/><path class="status-download" d="M12 7v9m-3-3 3 3 3-3"/></svg>
+          <span id="download-title" role="status" aria-live="polite">Comprobando…</span>
+        </button>
+        <span id="download-message" class="control-description">Espera la confirmación antes de salir sin conexión.</span>
+        <button id="install-open" class="header-control home-access" type="button" aria-label="Agregar a pantalla de inicio" title="Agregar a pantalla de inicio" aria-haspopup="dialog" aria-controls="install-info" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="2" width="13" height="20" rx="2"/><path d="M7 5h5M8 19h3M20 7v8m-4-4h8"/></svg>
+          <span>Agregar al inicio</span>
+        </button>
       </div>
-      <hr class="mt-4 border-gray-200"/>
     </header>
-
-    <div class="connection-tools">
-      <button id="connection-status" class="connection-status" type="button" aria-haspopup="dialog" aria-controls="offline-info" title="Ver estado de conexión y copia sin conexión">
-        <svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5" /></svg>
-        <span id="connection-label" role="status" aria-live="polite">Online</span>
-      </button>
-    </div>
     <dialog id="offline-info" class="offline-dialog" aria-labelledby="offline-info-title">
-      <h2 id="offline-info-title">Conexión y uso sin conexión</h2>
-      <p id="offline-state" role="status" aria-live="polite">Preparando uso sin conexión…</p>
-      <p id="offline-detail">La primera descarga necesita internet.</p>
-      <p>Los formatos enlazados de Google Drive requieren conexión.</p>
-      <div class="offline-actions">
+      <div class="dialog-heading"><h2 id="offline-info-title">Este dispositivo</h2><button id="offline-close" class="icon-button" type="button" autofocus aria-label="Cerrar estado del dispositivo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <section class="device-section">
+        <h3>Copia sin conexión</h3>
+        <p id="offline-state" class="device-state" role="status" aria-live="polite">Preparando uso sin conexión…</p>
+        <p id="offline-detail">La primera descarga necesita internet.</p>
+        <div id="download-progress" class="download-progress" role="progressbar" aria-label="Preparando los datos para usarlos sin conexión" hidden><span aria-hidden="true"></span></div>
         <button id="offline-check" class="btn" type="button">Guardar para usar sin conexión</button>
-        <button id="offline-close" class="btn btn-secondary" type="button" autofocus>Cerrar</button>
+      </section>
+      <section class="device-section">
+        <h3>Protección del almacenamiento</h3>
+        <p id="persistence-state" class="device-state" role="status" aria-live="polite">Comprobando…</p>
+        <p id="persistence-detail">El navegador decide si concede persistencia a la copia local.</p>
+        <button id="persistence-request" class="btn btn-secondary" type="button">Solicitar persistencia</button>
+      </section>
+      <p class="device-note">La persistencia reduce el riesgo de borrado automático. Borrar los datos del navegador elimina la copia. Los formatos de Google Drive requieren conexión o una descarga aparte.</p>
+    </dialog>
+    <dialog id="install-info" class="offline-dialog" aria-labelledby="install-title">
+      <div class="dialog-heading"><h2 id="install-title">Llévala contigo</h2><button id="install-close" class="icon-button" type="button" autofocus aria-label="Cerrar instrucciones"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <p>Ten la herramienta a la mano desde la pantalla de inicio de tu teléfono.</p>
+      <label class="label" for="install-platform">Instrucciones para</label>
+      <select id="install-platform" class="input"><option value="ios">iPhone o iPad · Safari</option><option value="android">Android · Chrome</option><option value="desktop">Computadora</option></select>
+      <ol id="install-steps" class="install-steps"></ol>
+      <p id="install-state" class="device-note" role="status" aria-live="polite"></p>
+      <button id="install-native" class="btn" type="button" hidden>Instalar acceso</button>
+      <div class="departure-note">
+        <h3>Antes de salir</h3>
+        <p>Abre la herramienta <strong>desde el nuevo ícono, con internet</strong>, y espera <strong>“Disponible sin conexión”</strong>.</p>
+        <p>En iPhone, la copia de Safari puede ser distinta de la que se guarda al abrir desde el ícono. Compruébala allí y solicita la persistencia desde el estado de conexión.</p>
       </div>
     </dialog>
     <dialog id="offline-update" class="offline-dialog" aria-labelledby="offline-update-title" aria-describedby="offline-update-description">
@@ -237,19 +265,23 @@
       <button id="offline-reload" class="btn" type="button" autofocus>Actualizar y recargar</button>
     </dialog>
 
-    <!-- Sistema de pestañas -->
-    <div class="tabs">
-      <div class="tab active" data-tab="salud">Cotizador GNP Salud</div>
-      <div class="tab" data-tab="vidatotal">Cotizador VidaTotal</div>
-      <div class="tab" data-tab="menus">Menús de Servicios</div>
-      <div class="tab" data-tab="campanas">Campañas de Emisión Autos</div>
+    <nav class="tabs" role="tablist" aria-label="Herramientas">
+      <button class="tab active" type="button" role="tab" aria-selected="true" aria-controls="tab-salud" id="nav-salud" tabindex="0" data-tab="salud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="M12 8v8m-4-4h8"/></svg><span>GNP Salud</span></button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-vidatotal" id="nav-vidatotal" tabindex="-1" data-tab="vidatotal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg><span>VidaTotal</span></button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-menus" id="nav-menus" tabindex="-1" data-tab="menus"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5V3Z"/><path d="M15 3v5h4M8 12h8M8 16h6"/></svg><span>Menús de servicios</span></button>
+      <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="tab-campanas" id="nav-campanas" tabindex="-1" data-tab="campanas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 17-7v16L3 13v-2Zm5 4 1 6h4l-1-5M20 9h2m-2 6h2"/></svg><span>Campañas de autos</span></button>
+    </nav>
+    <div class="page-heading">
+      <div><h1 id="page-title">Cotizador GNP Salud</h1><p id="page-description">Primas y formas de pago, con la vigencia a la vista.</p></div>
     </div>
-
     <!-- PESTAÑA 1: COTIZADOR GNP SALUD -->
-    <div id="tab-salud" class="tab-content active">
+    <div id="tab-salud" class="tab-content active" role="tabpanel" aria-labelledby="nav-salud">
+      <div class="quote-layout">
+        <section class="quote-inputs" aria-label="Datos de la cotización">
+          <div class="form-heading"><h2>Datos de la cotización</h2><p>Cotiza con los datos del asegurado.</p></div>
       <!-- Fila 0: Vigencia tarifaria -->
-      <section class="card mb-3 flex items-center gap-4">
-        <label class="label mb-0" style="white-space:nowrap">Vigencia tarifaria</label>
+      <section class="field-row validity-row mb-3 flex items-center gap-4">
+        <label class="label mb-0" for="vigencia" style="white-space:nowrap">Vigencia tarifaria</label>
         <select id="vigencia" class="input" style="width:auto">
           <option value="2025-2026">2025 – 2026</option>
           <option value="2026-2027">2026 – 2027</option>
@@ -260,23 +292,23 @@
       </section>
 
       <!-- Fila 1: Empresa + Producto (solo STRM) + Plan (solo STRM) -->
-      <section class="card grid md:grid-cols-3 gap-4 mb-3">
+      <section class="field-row grid md:grid-cols-3 gap-4 mb-3">
         <div>
-          <label class="label">Empresa</label>
+          <label class="label" for="cliente">Empresa</label>
           <select id="cliente" class="input w-full">
             <option value="BIMBO">BIMBO</option>
             <option value="STRM">STRM</option>
           </select>
         </div>
         <div id="producto-wrap" style="display:none">
-          <label class="label">Producto (STRM)</label>
+          <label class="label" for="producto">Producto (STRM)</label>
           <select id="producto" class="input w-full">
             <option value="LINEA_AZUL">Línea Azul</option>
             <option value="EXCESOS">Excesos</option>
           </select>
         </div>
         <div id="plan-wrap" style="display:none">
-          <label class="label">Plan (STRM)</label>
+          <label class="label" for="plan">Plan (STRM)</label>
           <select id="plan" class="input w-full">
             <option value="T1">T1</option>
             <option value="T2">T2</option>
@@ -285,25 +317,25 @@
       </section>
 
       <!-- Fila 2: Género + Edad -->
-      <section class="card grid md:grid-cols-3 gap-4 mb-3">
+      <section class="field-row grid md:grid-cols-3 gap-4 mb-3">
         <div>
-          <label class="label">Género</label>
+          <label class="label" for="genero">Género</label>
           <select id="genero" class="input w-full">
             <option value="H">Hombre</option>
             <option value="M">Mujer</option>
           </select>
         </div>
         <div>
-          <label class="label">Edad</label>
+          <label class="label" for="edad">Edad</label>
           <input id="edad" type="number" min="0" max="120" value="25" class="input w-full"/>
         </div>
         <div class="hidden md:block"></div>
       </section>
 
       <!-- Fila 3: Extra-Prima -->
-      <section class="card grid md:grid-cols-3 gap-4 mb-3 items-center">
+      <section class="field-row grid md:grid-cols-3 gap-4 mb-3 items-center">
         <div>
-          <label class="label">Extra-Prima (%)</label>
+          <label class="label" for="extraprima">Extra-Prima (%)</label>
           <input id="extraprima" type="number" min="0" max="100" step="0.1" value="0" placeholder="0" class="input w-full"/>
         </div>
         <div id="pago-mixto-wrap" style="display:none">
@@ -317,11 +349,16 @@
       </section>
 
       <!-- Fila 4: Botón Consultar -->
-      <section class="card mb-4">
-        <button id="btn-consultar" class="btn">Consultar</button>
+      <section class="field-row mb-4">
+        <button id="btn-consultar" class="btn quote-submit">Consultar prima <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button>
         <p id="status" class="text-xs text-red-600 mt-2 hidden"></p>
       </section>
 
+
+        </section>
+        <aside class="quote-results" aria-label="Resultado de cotización">
+          <div class="result-heading"><h2>Tu cotización</h2><p id="quote-context" class="quote-context"></p></div>
+          <div id="quote-empty" class="quote-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M7 6h10M7 11h2m3 0h2m3 0h.1M7 15h2m3 0h2m3 0h.1M7 19h2m3 0h2m3 0h.1"/></svg><h3>Una prima, con todo el detalle.</h3><p>Completa los datos y consulta la prima para ver sus formas de pago.</p></div>
       <!-- Resultado: Prima Original -->
       <section id="result-original" class="grid gap-4" style="display:none">
         <div class="kpi">
@@ -396,8 +433,8 @@
       <section id="meses-wrap" class="card mt-4" style="display:none">
         <div class="grid md:grid-cols-3 gap-4 items-end">
           <div>
-            <label class="label">Meses de cobertura</label>
-            <select id="meses" class="input w-full"></select>
+            <label class="label" for="meses">Meses de cobertura</label>
+          <select id="meses" class="input w-full"></select>
           </div>
           <div class="md:col-span-2 kpi">
             <div class="flex justify-between">
@@ -407,14 +444,19 @@
           </div>
         </div>
       </section>
+
+        </aside>
+      </div>
     </div>
 
-
     <!-- PESTAÑA 2: COTIZADOR VIDATOTAL -->
-    <div id="tab-vidatotal" class="tab-content">
+    <div id="tab-vidatotal" class="tab-content" role="tabpanel" aria-labelledby="nav-vidatotal">
+      <div class="quote-layout">
+        <section class="quote-inputs" aria-label="Datos de la cotización">
+          <div class="form-heading"><h2>Datos de la cotización</h2><p>Cotiza con los datos del asegurado.</p></div>
 
       <!-- Fila 1: Empresa + Producto (fijos, solo informativo) -->
-      <section class="card grid md:grid-cols-2 gap-4 mb-3">
+      <section class="field-row grid md:grid-cols-2 gap-4 mb-3">
         <div>
           <label class="label">Empresa</label>
           <div class="input w-full bg-gray-50 text-gray-500 cursor-default select-none">STRM</div>
@@ -426,32 +468,32 @@
       </section>
 
       <!-- Fila 2: Género + Condición + Edad -->
-      <section class="card grid md:grid-cols-3 gap-4 mb-3">
+      <section class="field-row grid md:grid-cols-3 gap-4 mb-3">
         <div>
-          <label class="label">Género</label>
+          <label class="label" for="vt-genero">Género</label>
           <select id="vt-genero" class="input w-full">
             <option value="H">Hombre</option>
             <option value="M">Mujer</option>
           </select>
         </div>
         <div>
-          <label class="label">Condición</label>
+          <label class="label" for="vt-condicion">Condición</label>
           <select id="vt-condicion" class="input w-full">
             <option value="NFE">No fumador</option>
             <option value="FE">Fumador</option>
           </select>
         </div>
         <div>
-          <label class="label">Edad</label>
+          <label class="label" for="vt-edad">Edad</label>
           <input id="vt-edad" type="number" min="15" max="80" value="35" class="input w-full"/>
           <p class="text-xs text-gray-400 mt-1">Rango válido: 15 – 80 años</p>
         </div>
       </section>
 
       <!-- Fila 3: Suma Asegurada + Pago Mixto -->
-      <section class="card grid md:grid-cols-3 gap-4 mb-3 items-center">
+      <section class="field-row grid md:grid-cols-3 gap-4 mb-3 items-center">
         <div>
-          <label class="label">Suma Asegurada</label>
+          <label class="label" for="vt-sa">Suma Asegurada</label>
           <input id="vt-sa" type="number" min="300000" max="2500000" step="100000" value="500000" class="input w-full"/>
           <p class="text-xs text-gray-400 mt-1">$300,000 – $2,500,000</p>
         </div>
@@ -460,11 +502,16 @@
       </section>
 
       <!-- Fila 4: Botón Consultar -->
-      <section class="card mb-4">
-        <button id="vt-btn-consultar" class="btn">Consultar</button>
+      <section class="field-row mb-4">
+        <button id="vt-btn-consultar" class="btn quote-submit">Consultar prima <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button>
         <p id="vt-status" class="text-xs text-red-600 mt-2 hidden"></p>
       </section>
 
+
+        </section>
+        <aside class="quote-results" aria-label="Resultado de cotización">
+          <div class="result-heading"><h2>Tu cotización</h2><p id="vt-quote-context" class="quote-context"></p></div>
+          <div id="vt-quote-empty" class="quote-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M7 6h10M7 11h2m3 0h2m3 0h.1M7 15h2m3 0h2m3 0h.1M7 19h2m3 0h2m3 0h.1"/></svg><h3>Una prima, con todo el detalle.</h3><p>Completa los datos y consulta la prima para ver sus formas de pago.</p></div>
       <!-- Resultado: Prima Original -->
       <section id="vt-result-original" class="grid gap-4" style="display:none">
         <div class="kpi">
@@ -488,10 +535,13 @@
       </section>
 
 
+
+        </aside>
+      </div>
     </div>
 
     <!-- PESTAÑA 3: MENÚS DE SERVICIOS -->
-    <div id="tab-menus" class="tab-content">
+    <div id="tab-menus" class="tab-content" role="tabpanel" aria-labelledby="nav-menus">
       <div class="ms-nav-ramo" id="ms-ramos"></div>
       <div class="ms-nav-aseg" id="ms-aseguradoras"></div>
       <div id="ms-toolbar" style="display:none">
@@ -505,7 +555,7 @@
     </div>
 
     <!-- PESTAÑA 4: CAMPAÑAS DE EMISIÓN AUTOS -->
-    <div id="tab-campanas" class="tab-content">
+    <div id="tab-campanas" class="tab-content" role="tabpanel" aria-labelledby="nav-campanas">
       <div class="ms-nav-ramo" id="camp-empresas"></div>
       <div class="ms-nav-aseg" id="camp-aseguradoras"></div>
       <div id="camp-toolbar">
@@ -519,6 +569,7 @@
     </div>
   </div>
 
+  <footer class="app-footer"><span>MCBrokers · Herramientas de producción</span><span>Herramientas para tu operación diaria</span></footer>
   <style>
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -1594,25 +1645,88 @@
     });
     // MODO SIN CONEXION
     async function iniciarModoSinConexion() {
-      const indicador = document.getElementById('connection-status');
-      const etiqueta = document.getElementById('connection-label');
-      const informacion = document.getElementById('offline-info');
-      const estado = document.getElementById('offline-state');
-      const detalle = document.getElementById('offline-detail');
-      const comprobarBtn = document.getElementById('offline-check');
-      const dialogo = document.getElementById('offline-update');
-      const recargarBtn = document.getElementById('offline-reload');
+      const porId = id => document.getElementById(id);
+      const indicador = porId('connection-status');
+      const etiqueta = porId('connection-label');
+      const informacion = porId('offline-info');
+      const estado = porId('offline-state');
+      const detalle = porId('offline-detail');
+      const comprobarBtn = porId('offline-check');
+      const dialogo = porId('offline-update');
+      const recargarBtn = porId('offline-reload');
+      const resumen = porId('offline-summary');
+      const tituloResumen = porId('download-title');
+      const mensajeResumen = porId('download-message');
+      const progreso = porId('download-progress');
+      const compatible = 'serviceWorker' in navigator && window.isSecureContext;
+      let registro, observado, copiaActual = null;
+      let comprobando = false, reparando = false, activando = false;
+      let actualizacionLista = false, recargando = false, revision = 0;
+      let aviso = '';
+      let controlador = compatible ? navigator.serviceWorker.controller : null;
+
+      function instalando() {
+        return Boolean(registro?.installing && !['installed', 'activated', 'redundant'].includes(registro.installing.state));
+      }
+      function pintar() {
+        const lista = copiaActual?.ready === true;
+        let fase, titulo, texto;
+        if (!compatible) {
+          fase = 'unsupported'; titulo = 'Uso sin conexión no disponible';
+          texto = 'Abre la herramienta con HTTPS en un navegador actualizado.';
+        } else if (reparando || activando || instalando()) {
+          fase = 'downloading';
+          titulo = activando ? 'Preparando actualización…' : controlador ? 'Descargando actualización…' : 'Descargando datos…';
+          texto = 'No cierres ni recargues esta página hasta que termine.';
+          if (lista) texto += ' La copia anterior se conserva mientras termina la descarga.';
+        } else if (actualizacionLista) {
+          fase = 'update'; titulo = 'Actualización descargada';
+          texto = 'Pulsa «Actualizar y recargar» para usar la nueva versión.';
+        } else if (comprobando) {
+          fase = 'checking'; titulo = 'Comprobando datos guardados…';
+          texto = 'Espera la confirmación antes de salir sin conexión.';
+        } else if (aviso) {
+          fase = lista ? 'warning' : 'error';
+          titulo = lista ? 'Disponible sin conexión · copia anterior' : 'La descarga no se completó';
+          texto = aviso;
+        } else if (lista) {
+          fase = 'ready'; titulo = 'Disponible sin conexión';
+          texto = 'La copia está completa y verificada en este dispositivo. Ya puedes cerrar esta página.';
+        } else {
+          fase = 'missing'; titulo = 'Falta descargar los datos';
+          texto = navigator.onLine ? 'Descarga la copia y espera «Disponible sin conexión» antes de cerrar.' : 'Conéctate para descargar una copia completa antes de salir.';
+        }
+        resumen.dataset.state = fase;
+        tituloResumen.textContent = {
+          unsupported: 'No disponible', downloading: 'Descargando · espera', update: 'Actualizar',
+          checking: 'Comprobando…', warning: 'Copia anterior', error: 'Descarga incompleta',
+          ready: 'Disponible sin conexión', missing: 'Falta descargar'
+        }[fase];
+        mensajeResumen.textContent = texto;
+        resumen.title = `${titulo}. ${texto}`;
+        progreso.hidden = fase !== 'downloading';
+        estado.textContent = lista && fase === 'ready' && !navigator.onLine ? 'Sin conexión · copia disponible' : titulo;
+        detalle.textContent = lista && copiaActual.savedAt
+          ? `Última descarga: ${new Date(copiaActual.savedAt).toLocaleString('es-MX')} · Revisa también la vigencia tarifaria seleccionada. ${texto}`
+          : texto;
+        comprobarBtn.textContent = lista ? (navigator.onLine ? 'Buscar actualizaciones' : 'Verificar copia guardada') : 'Descargar datos';
+        comprobarBtn.disabled = !compatible || comprobando || reparando || activando || instalando() || (!navigator.onLine && !lista);
+      }
       function actualizarIndicador() {
-        etiqueta.textContent = navigator.onLine ? 'Online' : 'Offline';
+        etiqueta.textContent = navigator.onLine ? 'Con conexión' : 'Sin conexión';
         indicador.dataset.offline = String(!navigator.onLine);
+        pintar();
+      }
+      function abrirDetalle() {
+        if (!dialogo.open && !informacion.open) informacion.showModal();
       }
       actualizarIndicador();
       window.addEventListener('online', actualizarIndicador);
       window.addEventListener('offline', actualizarIndicador);
-      indicador.addEventListener('click', () => {
-        if (!dialogo.open && !informacion.open) informacion.showModal();
-      });
-      document.getElementById('offline-close').addEventListener('click', () => informacion.close());
+      indicador.addEventListener('click', abrirDetalle);
+      resumen.addEventListener('click', abrirDetalle);
+      porId('offline-close').addEventListener('click', () => informacion.close());
+
       const campos = ['cliente', 'producto', 'plan', 'vigencia', 'genero', 'edad', 'extraprima', 'pago-mixto',
         'vt-genero', 'vt-condicion', 'vt-edad', 'vt-sa'];
       const claveEntradas = 'mcb-tools-quote-inputs';
@@ -1621,29 +1735,14 @@
         sessionStorage.removeItem(claveEntradas);
         if (guardado) {
           for (const id of campos) {
-            const campo = document.getElementById(id);
+            const campo = porId(id);
             if (campo && guardado[id]) { campo.value = guardado[id].value; campo.checked = guardado[id].checked; }
           }
-          toggleProductoYPlan();
-          normalizarPlanStrm();
-          actualizarAvisoVigencia();
+          toggleProductoYPlan(); normalizarPlanStrm(); actualizarAvisoVigencia();
         }
-      } catch (_) { /* La cotización puede continuar aunque el navegador no permita guardar entradas. */ }
-
-      if (!('serviceWorker' in navigator) || !window.isSecureContext) {
-        estado.textContent = 'Uso sin conexión no disponible en este navegador';
-        detalle.textContent = 'Abre la herramienta con HTTPS en un navegador actualizado.';
-        comprobarBtn.disabled = true;
-        return;
-      }
-      let registro;
-      let comprobando = false;
-      let copiaDisponible = false;
-      let observado;
-      let controlador = navigator.serviceWorker.controller;
-      let recargando = false;
+      } catch (_) { /* La cotización puede continuar si el navegador no permite guardar entradas. */ }
+      if (!compatible) return;
       const scope = new URL('./', window.location.href).href;
-
       function mensaje(worker, type) {
         return new Promise((resolve, reject) => {
           const canal = new MessageChannel();
@@ -1654,58 +1753,48 @@
           catch (error) { clearTimeout(tiempo); cerrar(); reject(error); }
         });
       }
-
       async function avisarActualizacion() {
         const pendiente = registro?.waiting;
-        if (!pendiente || !navigator.serviceWorker.controller || dialogo.open) return;
+        if (!pendiente) { actualizacionLista = false; return; }
+        if (!navigator.serviceWorker.controller || dialogo.open) return;
         const copia = await mensaje(pendiente, 'GET_OFFLINE_STATUS');
-        if (copia.ready && pendiente === registro.waiting && !dialogo.open) {
-          informacion.close();
-          dialogo.showModal();
+        if (copia.ready && !copia.error && pendiente === registro.waiting && !dialogo.open) {
+          actualizacionLista = true;
+          informacion.close(); porId('install-info').close(); dialogo.showModal();
         }
       }
-
       async function mostrarEstado() {
-        await avisarActualizacion();
-        copiaDisponible = false;
+        const lectura = ++revision;
+        try { await avisarActualizacion(); }
+        catch (error) { if (lectura !== revision) return; throw error; }
         const worker = navigator.serviceWorker.controller || registro?.active;
-        if (!worker) {
-          estado.textContent = registro?.installing ? 'Guardando copia para usar sin conexión…' : 'Todavía no hay una copia sin conexión';
-          detalle.textContent = 'Mantén la conexión hasta que aparezca «Disponible sin conexión».';
-          comprobarBtn.textContent = 'Guardar para usar sin conexión';
-          return;
+        if (!worker) { copiaActual = null; pintar(); return; }
+        let copia;
+        try { copia = await mensaje(worker, 'GET_OFFLINE_STATUS'); }
+        catch (error) {
+          if (lectura !== revision || worker !== (navigator.serviceWorker.controller || registro?.active)) return;
+          throw error;
         }
-        const copia = await mensaje(worker, 'GET_OFFLINE_STATUS');
-        copiaDisponible = copia.ready;
-        estado.textContent = copia.ready
-          ? (navigator.onLine ? 'Disponible sin conexión' : 'Sin conexión · copia disponible')
-          : 'Falta guardar una copia completa';
-        detalle.textContent = copia.ready && copia.savedAt
-          ? `Última descarga: ${new Date(copia.savedAt).toLocaleString('es-MX')} · Revisa también la vigencia tarifaria seleccionada.`
-          : 'Conéctate y pulsa «Guardar para usar sin conexión» antes de salir.';
-        comprobarBtn.textContent = copia.ready ? 'Buscar actualizaciones' : 'Guardar para usar sin conexión';
+        if (lectura !== revision || worker !== (navigator.serviceWorker.controller || registro?.active)) return;
+        if (copia.error) throw new Error(copia.error);
+        copiaActual = copia;
+        pintar();
       }
-
       function observarInstalacion() {
         const worker = registro.installing;
         if (!worker || worker === observado) return;
-        observado = worker;
-        comprobarBtn.disabled = true;
-        estado.textContent = controlador ? 'Descargando actualización…' : 'Guardando copia para usar sin conexión…';
+        observado = worker; revision++; pintar();
         worker.addEventListener('statechange', async () => {
-          if (!['installed', 'activated', 'redundant'].includes(worker.state)) return;
-          comprobarBtn.disabled = false;
-          try {
-            await mostrarEstado();
-            if (worker.state === 'redundant') detalle.textContent += ' No se pudo completar la descarga; vuelve a intentarlo con conexión.';
-          } catch (_) { estado.textContent = 'No se pudo verificar la copia sin conexión'; }
+          if (worker !== observado || !['installed', 'activated', 'redundant'].includes(worker.state)) return;
+          if (worker.state === 'redundant') aviso = 'No se completó la descarga. La copia anterior, si estaba guardada, se conserva. Vuelve a intentarlo con conexión.';
+          try { await mostrarEstado(); }
+          catch (_) { copiaActual = null; aviso = 'No se pudo verificar la copia sin conexión. Vuelve a intentarlo con conexión.'; }
+          pintar();
         });
       }
-
       async function comprobar(manual = false) {
         if (comprobando) return;
-        comprobando = true;
-        comprobarBtn.disabled = true;
+        comprobando = true; aviso = ''; pintar();
         try {
           if (!registro) {
             registro = await navigator.serviceWorker.getRegistration(scope);
@@ -1717,58 +1806,62 @@
           if (navigator.onLine) await registro.update();
           observarInstalacion();
           const worker = navigator.serviceWorker.controller || registro.active;
-          if ((manual || registro.waiting) && navigator.onLine && worker && !registro.installing) {
+          if ((manual || registro.waiting) && navigator.onLine && worker && !instalando()) {
             const destino = registro.waiting || worker;
             const copia = await mensaje(destino, 'GET_OFFLINE_STATUS');
             if (!copia.ready) {
-              estado.textContent = 'Guardando copia para usar sin conexión…';
-              const guardada = await mensaje(destino, 'CACHE_OFFLINE');
-              if (!guardada.ready) throw new Error('Copia incompleta');
+              reparando = true; pintar();
+              try {
+                const guardada = await mensaje(destino, 'CACHE_OFFLINE');
+                if (!guardada.ready || guardada.error) throw new Error('Copia incompleta');
+              } finally { reparando = false; }
             }
           }
           await mostrarEstado();
         } catch (_) {
           try { await mostrarEstado(); }
-          catch (_) { estado.textContent = 'No se pudo verificar la copia sin conexión'; }
-          detalle.textContent += copiaDisponible
-            ? ' No se pudieron buscar actualizaciones. Puedes seguir usando la copia guardada.'
-            : ' No se pudo completar la descarga. Vuelve a intentarlo con conexión.';
+          catch (_) { copiaActual = null; }
+          aviso = copiaActual?.ready
+            ? 'No se pudieron buscar actualizaciones. Puedes seguir usando la copia guardada anterior y volver a intentarlo con conexión.'
+            : 'No se pudo completar la descarga. Mantén la conexión y vuelve a intentarlo antes de salir.';
         } finally {
-          comprobando = false;
-          comprobarBtn.disabled = Boolean(registro?.installing);
+          comprobando = false; pintar();
         }
       }
-
       dialogo.addEventListener('cancel', event => event.preventDefault());
       recargarBtn.addEventListener('click', async () => {
         if (!registro?.waiting) { comprobar(); return; }
-        recargarBtn.disabled = true;
-        recargarBtn.textContent = 'Recargando…';
+        recargarBtn.disabled = true; recargarBtn.textContent = 'Preparando y recargando…';
+        activando = true; pintar();
         try {
           const copia = await mensaje(registro.waiting, 'ACTIVATE_UPDATE');
           if (!copia.ready || copia.error) throw new Error('Copia incompleta');
         } catch (_) {
-          document.getElementById('offline-update-description').textContent = 'No se pudo completar la actualización. La copia anterior se conserva. Conéctate y vuelve a intentarlo.';
-          recargarBtn.disabled = false;
-          recargarBtn.textContent = 'Reintentar actualización';
+          activando = false; actualizacionLista = false;
+          aviso = 'No se completó la actualización. La copia anterior, si estaba guardada, se conserva. Conéctate y vuelve a intentarlo.';
+          porId('offline-update-description').textContent = 'No se pudo completar la actualización. La copia anterior se conserva. Conéctate y vuelve a intentarlo.';
+          recargarBtn.disabled = false; recargarBtn.textContent = 'Reintentar actualización'; pintar();
         }
       });
       navigator.serviceWorker.addEventListener('controllerchange', () => {
+        revision++; copiaActual = null;
         if (!controlador) { controlador = navigator.serviceWorker.controller; mostrarEstado().catch(() => {}); return; }
         if (recargando) return;
         recargando = true;
         try {
           const entradas = Object.fromEntries(campos.map(id => {
-            const campo = document.getElementById(id);
+            const campo = porId(id);
             return [id, { value: campo.value, checked: campo.checked }];
           }));
           sessionStorage.setItem(claveEntradas, JSON.stringify(entradas));
         } catch (_) { /* Recargar sigue siendo posible si el almacenamiento está deshabilitado. */ }
-        window.location.reload();
+        pintar(); window.location.reload();
       });
       comprobarBtn.addEventListener('click', () => comprobar(true));
       window.addEventListener('online', () => comprobar());
-      window.addEventListener('offline', () => mostrarEstado().catch(() => {}));
+      window.addEventListener('offline', () => mostrarEstado().catch(() => {
+        copiaActual = null; aviso = 'No se pudo verificar la copia guardada. Conéctate y vuelve a intentarlo.'; pintar();
+      }));
       window.addEventListener('focus', () => comprobar());
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') comprobar(); });
       setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLine) comprobar(); }, 15 * 60 * 1000);
@@ -1777,5 +1870,7 @@
     // FIN MODO SIN CONEXION
     iniciarModoSinConexion();
   </script>
+  <script src="./assets/prepare-device.js"></script>
+  <script type="module" src="./assets/app-ui.js"></script>
 </body>
 </html>

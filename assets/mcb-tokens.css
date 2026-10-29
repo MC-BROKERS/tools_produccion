@@ -1,0 +1,43 @@
+@font-face {
+  font-family: Geist;
+  src: url('./fonts/geist-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: Outfit;
+  src: url('./fonts/outfit-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  color-scheme: light;
+  --canvas: #ffffff;
+  --surface: #ffffff;
+  --surface-muted: #f4f7fb;
+  --ink: #12243d;
+  --muted: #556175;
+  --navy: #0b2f54;
+  --line: #d9e2ef;
+  --line-strong: #a8bad2;
+  --brand-blue: #0052a1;
+  --brand-green: #15892e;
+  --brand-pink: #ee2059;
+  --brand-pink-ink: #cf1149;
+  --brand-lime: #88b450;
+  --accent: var(--brand-blue);
+  --accent-hover: #08427f;
+  --accent-soft: #eaf2fb;
+  --success: var(--brand-green);
+  --success-soft: #eaf6ed;
+  --danger: #b52e3a;
+  --danger-soft: #fff0f1;
+  --warning: #80550c;
+  --warning-soft: #fff4df;
+  --radius: 4px;
+  --font-body: Geist, system-ui, sans-serif;
+  --font-heading: Outfit, Geist, system-ui, sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}

@@ -22,7 +22,7 @@ async function openApp({ ready = true, waiting = false, candidateReady = true, c
   const start = html.indexOf('    // MODO SIN CONEXION');
   const end = html.indexOf('    // FIN MODO SIN CONEXION');
   assert.ok(start >= 0 && end > start, 'La herramienta debe implementar el modo sin conexión');
-  const nodes = Object.fromEntries(['connection-status', 'connection-label', 'offline-info', 'offline-close',
+  const nodes = Object.fromEntries(['connection-status', 'connection-label', 'offline-info', 'offline-close', 'install-info', 'offline-summary', 'download-title', 'download-message', 'download-progress',
     'offline-state', 'offline-detail', 'offline-check', 'offline-update', 'offline-reload', 'offline-update-description',
     'cliente', 'producto', 'plan', 'vigencia', 'genero', 'edad', 'extraprima', 'pago-mixto',
     'vt-genero', 'vt-condicion', 'vt-edad', 'vt-sa'].map(id => [id, new Element()]));
@@ -67,7 +67,7 @@ async function openApp({ ready = true, waiting = false, candidateReady = true, c
 
 test('indicador compacto muestra conexión y abre el detalle sólo al seleccionarlo', async () => {
   const app = await openApp();
-  assert.equal(app.nodes['connection-label'].textContent, 'Online');
+  assert.equal(app.nodes['connection-label'].textContent, 'Con conexión');
   assert.equal(app.nodes['offline-info'].open, false);
   app.nodes['connection-status'].click();
   assert.equal(app.nodes['offline-info'].open, true);
@@ -75,14 +75,14 @@ test('indicador compacto muestra conexión y abre el detalle sólo al selecciona
   assert.equal(app.nodes['offline-info'].open, false);
   app.navigator.onLine = false;
   app.window.dispatchEvent(new Event('offline'));
-  assert.equal(app.nodes['connection-label'].textContent, 'Offline');
+  assert.equal(app.nodes['connection-label'].textContent, 'Sin conexión');
   assert.equal(app.nodes['offline-info'].open, false);
   for (let i = 0; i < 10; i++) await setImmediate();
   app.nodes['connection-status'].click();
   assert.match(app.nodes['offline-state'].textContent, /Sin conexión.*copia disponible/);
   app.navigator.onLine = true;
   app.window.dispatchEvent(new Event('online'));
-  assert.equal(app.nodes['connection-label'].textContent, 'Online');
+  assert.equal(app.nodes['connection-label'].textContent, 'Con conexión');
 });
 
 test('al llegar una actualización, el aviso obligatorio queda sobre el detalle de conexión', async () => {
@@ -117,7 +117,7 @@ test('confirma disponibilidad solo cuando la copia completa fue verificada', asy
   assert.ok(app.messages.includes('GET_OFFLINE_STATUS'));
   const incomplete = await openApp({ ready: false });
   assert.doesNotMatch(incomplete.nodes['offline-state'].textContent, /Disponible sin conexión/);
-  assert.match(incomplete.nodes['offline-check'].textContent, /Guardar/);
+  assert.match(incomplete.nodes['offline-check'].textContent, /Descargar/);
 });
 
 test('actualización descargada exige recarga y no permite cerrar con Escape', async () => {
