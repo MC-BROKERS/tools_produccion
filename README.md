@@ -22,7 +22,7 @@ proyecto/
     │   ├── pricing-bimbo-2025-2026.json
     │   ├── pricing-strm-2025-2026.json
     │   ├── pricing-strm-excesos-2025-2026.json
-    │   └── pricing-t2-rm-2025-2026.json
+    │   └── pricing-t2-rm-2025-2026.json # Histórico, sin acceso desde el cotizador
     └── 2026-2027/
         ├── pricing-bimbo-2026-2027.json
         ├── pricing-strm-2026-2027.json
@@ -31,7 +31,9 @@ proyecto/
 
 ## 🚀 Uso
 
-Abre la herramienta desde **GitHub Pages**. La primera visita necesita internet: espera el mensaje **Disponible sin conexión** antes de salir. Se guarda una copia completa de la página, su diseño y todas las tarifas disponibles en ese navegador y equipo.
+Abre la herramienta desde **GitHub Pages**. La primera visita necesita internet: pulsa el botón **Online** y espera el mensaje **Disponible sin conexión** antes de salir. Se guarda una copia completa de la página, su diseño y todas las tarifas disponibles en ese navegador y equipo.
+
+El indicador compacto muestra **Online** u **Offline**. Al pulsarlo se abre el detalle de la copia local y el botón para guardar o buscar actualizaciones. El detalle se puede cerrar; el aviso obligatorio de actualización sigue apareciendo cuando corresponde.
 
 Después puedes cerrar y volver a abrir la herramienta sin señal. También puedes agregarla a la pantalla de inicio desde el menú del navegador. Si borras los datos del navegador o este libera su almacenamiento, tendrás que descargarla nuevamente. Evita la navegación privada para este uso.
 
@@ -64,7 +66,7 @@ Tailwind 3.4.17 se conserva localmente en `assets/tailwind-3.4.17.js`, con su li
 ## 🎯 Cotizador GNP Salud
 
 - Empresas: STRM y BIMBO
-- Productos STRM: Línea Azul (T1 / T2 / Traspaso Respaldo Médico) y Excesos
+- Productos STRM: Línea Azul y Excesos (T1 / T2)
 - Selector de vigencia tarifaria (2025–2026 / 2026–2027)
 - Cálculo de extra-prima
 - Modalidad pago mixto (STRM)
@@ -147,10 +149,6 @@ Edita `data/ejemplos-expedientes.json`:
   "Nueva Empresa": ["12345678", "87654321"]
 }
 ```
-
-## 🔧 Pendientes conocidos
-
-- Agregar `pricing-t2-rm-2026-2027.json` cuando esté disponible
 
 ---
 

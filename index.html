@@ -183,10 +183,12 @@
     .camp-ejemplos{font-size:.78rem;color:var(--muted);margin-top:.4rem;font-family:monospace}
     .camp-credito{display:inline-block;background:#E6F1FB;color:#185FA5;font-size:.7rem;font-weight:600;padding:.15rem .55rem;border-radius:999px;margin-left:.4rem;vertical-align:middle}
 
-    .offline-panel{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.9rem 1rem;margin-bottom:1rem;border:1px solid #DCEBFF;border-radius:14px;background:#F7FAFF}
-    .offline-panel strong{display:block;font-size:.9rem;color:var(--mcb-blue)}
-    .offline-panel p{font-size:.78rem;color:var(--muted);margin-top:.25rem;max-width:42rem}
-    .offline-panel button{font-size:.82rem;white-space:nowrap;min-height:44px}
+    .connection-tools{display:flex;justify-content:flex-end;margin-bottom:.75rem}
+    .connection-status{display:inline-flex;align-items:center;gap:.5rem;min-height:44px;padding:.5rem .85rem;border:1px solid #C8DDD0;border-radius:999px;background:#F2FAF4;color:#217A37;font-size:.82rem;font-weight:600;cursor:pointer}
+    .connection-status[data-offline="true"]{color:#9A3F0B;background:#FFF6ED;border-color:#E8CDB5}
+    .connection-status:focus-visible{outline:3px solid #0057A4;outline-offset:3px}
+    .connection-status svg{width:12px;height:12px;fill:currentColor}
+    .offline-actions{display:grid;gap:.75rem}
     .offline-dialog{width:min(90vw,440px);margin:auto;padding:1.6rem;border:0;border-radius:18px;color:var(--ink);box-shadow:0 20px 60px #0004}
     .offline-dialog::backdrop{background:#15283ccc}
     .offline-dialog h2{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
@@ -197,7 +199,6 @@
       .tab{flex-shrink:0}
       header img{height:64px}
       header h1{font-size:1.1rem;line-height:1.25}
-      .offline-panel button{width:100%}
     }
   </style>
 </head>
@@ -213,14 +214,22 @@
       <hr class="mt-4 border-gray-200"/>
     </header>
 
-    <section class="offline-panel" aria-label="Uso sin conexión">
-      <div role="status" aria-live="polite">
-        <strong id="offline-state">Preparando uso sin conexión…</strong>
-        <p id="offline-detail">La primera descarga necesita internet.</p>
-        <p>Los formatos enlazados de Google Drive requieren conexión.</p>
+    <div class="connection-tools">
+      <button id="connection-status" class="connection-status" type="button" aria-haspopup="dialog" aria-controls="offline-info" title="Ver estado de conexión y copia sin conexión">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5" /></svg>
+        <span id="connection-label" role="status" aria-live="polite">Online</span>
+      </button>
+    </div>
+    <dialog id="offline-info" class="offline-dialog" aria-labelledby="offline-info-title">
+      <h2 id="offline-info-title">Conexión y uso sin conexión</h2>
+      <p id="offline-state" role="status" aria-live="polite">Preparando uso sin conexión…</p>
+      <p id="offline-detail">La primera descarga necesita internet.</p>
+      <p>Los formatos enlazados de Google Drive requieren conexión.</p>
+      <div class="offline-actions">
+        <button id="offline-check" class="btn" type="button">Guardar para usar sin conexión</button>
+        <button id="offline-close" class="btn btn-secondary" type="button" autofocus>Cerrar</button>
       </div>
-      <button id="offline-check" class="btn btn-secondary" type="button">Guardar para usar sin conexión</button>
-    </section>
+    </dialog>
     <dialog id="offline-update" class="offline-dialog" aria-labelledby="offline-update-title" aria-describedby="offline-update-description">
       <h2 id="offline-update-title">Hay una actualización lista</h2>
       <p id="offline-update-description">La nueva versión ya se descargó para usarla sin conexión. Actualiza y recarga para continuar con los datos más recientes.</p>
@@ -271,7 +280,6 @@
           <select id="plan" class="input w-full">
             <option value="T1">T1</option>
             <option value="T2">T2</option>
-            <option value="TraspasoRM">Traspaso Respaldo Médico</option>
           </select>
         </div>
       </section>
@@ -545,35 +553,26 @@
     const PERIODOS_DISPONIBLES = {
       BIMBO:            ['2025-2026', '2026-2027'],
       STRM_LINEA_AZUL:  ['2025-2026', '2026-2027'],
-      STRM_EXCESOS:     ['2025-2026', '2026-2027'],
-      STRM_TRASPASO_RM: ['2025-2026', '2026-2027']
+      STRM_EXCESOS:     ['2025-2026', '2026-2027']
     };
 
     function getJsonPaths(periodo) {
       return {
         BIMBO:           `pricing/${periodo}/pricing-bimbo-${periodo}.json`,
         STRM_LINEA_AZUL: `pricing/${periodo}/pricing-strm-${periodo}.json`,
-        STRM_EXCESOS:    `pricing/${periodo}/pricing-strm-excesos-${periodo}.json`,
-        STRM_TRASPASO_RM:`pricing/${periodo}/pricing-t2-rm-${periodo}.json`
+        STRM_EXCESOS:    `pricing/${periodo}/pricing-strm-excesos-${periodo}.json`
       };
     }
 
     // Determina la clave de PERIODOS_DISPONIBLES según contexto
-    function getPeriodosKey(cliente, producto, plan) {
+    function getPeriodosKey(cliente, producto) {
       if (cliente === 'BIMBO') return 'BIMBO';
       if (producto === 'EXCESOS') return 'STRM_EXCESOS';
-      if (plan === 'TraspasoRM') return 'STRM_TRASPASO_RM';
       return 'STRM_LINEA_AZUL';
     }
 
-    // Periodo más reciente disponible según contexto
-    function periodoActivo(cliente, producto, plan) {
-      const periodos = PERIODOS_DISPONIBLES[getPeriodosKey(cliente, producto, plan)];
-      return periodos[periodos.length - 1];
-    }
-
     function actualizarAvisoVigencia() {
-      const key = getPeriodosKey($('#cliente').value, $('#producto').value, $('#plan').value);
+      const key = getPeriodosKey($('#cliente').value, $('#producto').value);
       const periodo = $('#vigencia').value;
       const disponible = PERIODOS_DISPONIBLES[key].includes(periodo);
       const aviso = $('#vigencia-aviso');
@@ -582,7 +581,7 @@
     }
 
     function sincronizarVigenciaConCliente() {
-      const key = getPeriodosKey($('#cliente').value, $('#producto').value, $('#plan').value);
+      const key = getPeriodosKey($('#cliente').value, $('#producto').value);
       const periodos = PERIODOS_DISPONIBLES[key];
       $('#vigencia').value = periodos[periodos.length - 1];
       actualizarAvisoVigencia();
@@ -609,11 +608,8 @@
       if (cliente === 'BIMBO') {
         key = 'BIMBO';
       } else if (cliente === 'STRM') {
-        if (producto === 'LINEA_AZUL' && plan === 'TraspasoRM') {
-          key = 'STRM_TRASPASO_RM';
-        } else {
-          key = producto === 'EXCESOS' ? 'STRM_EXCESOS' : 'STRM_LINEA_AZUL';
-        }
+        if (!['T1', 'T2'].includes(plan)) throw new Error('Selecciona un plan disponible: T1 o T2.');
+        key = producto === 'EXCESOS' ? 'STRM_EXCESOS' : 'STRM_LINEA_AZUL';
       }
       const url = paths[key];
       const res = await fetch(url);
@@ -703,8 +699,7 @@
         if (cliente === 'BIMBO') {
           r = calcularBimbo(pricing, genero, edad);
         } else {
-          const planKey = plan === 'TraspasoRM' ? 'PlanUnico' : plan;
-          r = calcularStrm(pricing, planKey, genero, edad);
+          r = calcularStrm(pricing, plan, genero, edad);
         }
         
         $('#result-original').style.display = '';
@@ -782,20 +777,15 @@
       }
     }
 
-    function toggleTraspasoRM() {
-      const isExcesos = $('#producto').value === 'EXCESOS';
-      const optTraspasoRM = $('#plan').querySelector('option[value="TraspasoRM"]');
-      optTraspasoRM.hidden = isExcesos;
-      if (isExcesos && $('#plan').value === 'TraspasoRM') {
-        $('#plan').value = 'T1';
-      }
+    function normalizarPlanStrm() {
+      if (!['T1', 'T2'].includes($('#plan').value)) $('#plan').value = 'T1';
     }
 
     toggleProductoYPlan();
     sincronizarVigenciaConCliente();
     $('#vigencia').addEventListener('change', actualizarAvisoVigencia);
     $('#cliente').addEventListener('change', () => { toggleProductoYPlan(); sincronizarVigenciaConCliente(); });
-    $('#producto').addEventListener('change', () => { toggleTraspasoRM(); sincronizarVigenciaConCliente(); });
+    $('#producto').addEventListener('change', () => { normalizarPlanStrm(); sincronizarVigenciaConCliente(); });
     $('#plan').addEventListener('change', actualizarAvisoVigencia);
     $('#btn-consultar').addEventListener('click', consultar);
 
@@ -1604,11 +1594,25 @@
     });
     // MODO SIN CONEXION
     async function iniciarModoSinConexion() {
+      const indicador = document.getElementById('connection-status');
+      const etiqueta = document.getElementById('connection-label');
+      const informacion = document.getElementById('offline-info');
       const estado = document.getElementById('offline-state');
       const detalle = document.getElementById('offline-detail');
       const comprobarBtn = document.getElementById('offline-check');
       const dialogo = document.getElementById('offline-update');
       const recargarBtn = document.getElementById('offline-reload');
+      function actualizarIndicador() {
+        etiqueta.textContent = navigator.onLine ? 'Online' : 'Offline';
+        indicador.dataset.offline = String(!navigator.onLine);
+      }
+      actualizarIndicador();
+      window.addEventListener('online', actualizarIndicador);
+      window.addEventListener('offline', actualizarIndicador);
+      indicador.addEventListener('click', () => {
+        if (!dialogo.open && !informacion.open) informacion.showModal();
+      });
+      document.getElementById('offline-close').addEventListener('click', () => informacion.close());
       const campos = ['cliente', 'producto', 'plan', 'vigencia', 'genero', 'edad', 'extraprima', 'pago-mixto',
         'vt-genero', 'vt-condicion', 'vt-edad', 'vt-sa'];
       const claveEntradas = 'mcb-tools-quote-inputs';
@@ -1621,7 +1625,7 @@
             if (campo && guardado[id]) { campo.value = guardado[id].value; campo.checked = guardado[id].checked; }
           }
           toggleProductoYPlan();
-          toggleTraspasoRM();
+          normalizarPlanStrm();
           actualizarAvisoVigencia();
         }
       } catch (_) { /* La cotización puede continuar aunque el navegador no permita guardar entradas. */ }
@@ -1655,7 +1659,10 @@
         const pendiente = registro?.waiting;
         if (!pendiente || !navigator.serviceWorker.controller || dialogo.open) return;
         const copia = await mensaje(pendiente, 'GET_OFFLINE_STATUS');
-        if (copia.ready && pendiente === registro.waiting && !dialogo.open) dialogo.showModal();
+        if (copia.ready && pendiente === registro.waiting && !dialogo.open) {
+          informacion.close();
+          dialogo.showModal();
+        }
       }
 
       async function mostrarEstado() {
