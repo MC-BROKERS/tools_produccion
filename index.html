@@ -4,11 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MCBrokers — Herramientas Internas</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="theme-color" content="#0057A4" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./assets/app-icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./assets/Logo_Colores_MCB.png" />
+  <script src="./assets/tailwind-3.4.17.js"></script>
   <style>
     :root{
       --mcb-blue:#0057A4;
-      --mcb-green:#2FA24A;
+      --mcb-green:#217A37;
       --mcb-lime:#9CCB3B;
       --ink:#1F2937;
       --muted:#6B7280;
@@ -39,7 +43,7 @@
     .primary-amount {font-size:1.6rem;font-weight:800;color:var(--mcb-blue)}
     .badge {
       background: var(--mcb-lime);
-      color: white;
+      color: var(--ink);
       font-size: 0.75rem;
       font-weight: 700;
       padding: 0.2rem 0.6rem;
@@ -76,7 +80,7 @@
     }
     .campana-card:hover{
       border-color:var(--mcb-blue);
-      box-shadow:0 2px 8px rgba(0,87,164,.1);
+      box-shadow:0 2px 8px rgba(0,0,0,.1);
     }
     .campana-nombre{
       font-size:1.05rem;
@@ -106,7 +110,7 @@
       transition:all .2s;
     }
     .copy-btn:hover{filter:brightness(1.1)}
-    .copy-btn.copied{background:#22c55e;border-color:#16a34a}
+    .copy-btn.copied{background:var(--mcb-green);border-color:#1d672f}
     .results-count{
       font-size:.9rem;
       color:var(--muted);
@@ -179,6 +183,22 @@
     .camp-ejemplos{font-size:.78rem;color:var(--muted);margin-top:.4rem;font-family:monospace}
     .camp-credito{display:inline-block;background:#E6F1FB;color:#185FA5;font-size:.7rem;font-weight:600;padding:.15rem .55rem;border-radius:999px;margin-left:.4rem;vertical-align:middle}
 
+    .offline-panel{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.9rem 1rem;margin-bottom:1rem;border:1px solid #DCEBFF;border-radius:14px;background:#F7FAFF}
+    .offline-panel strong{display:block;font-size:.9rem;color:var(--mcb-blue)}
+    .offline-panel p{font-size:.78rem;color:var(--muted);margin-top:.25rem;max-width:42rem}
+    .offline-panel button{font-size:.82rem;white-space:nowrap;min-height:44px}
+    .offline-dialog{width:min(90vw,440px);margin:auto;padding:1.6rem;border:0;border-radius:18px;color:var(--ink);box-shadow:0 20px 60px #0004}
+    .offline-dialog::backdrop{background:#15283ccc}
+    .offline-dialog h2{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .offline-dialog p{font-size:.9rem;line-height:1.5;margin-bottom:1rem}
+    .offline-dialog button{width:100%;min-height:44px}
+    @media(max-width:640px){
+      .tabs{overflow-x:auto}
+      .tab{flex-shrink:0}
+      header img{height:64px}
+      header h1{font-size:1.1rem;line-height:1.25}
+      .offline-panel button{width:100%}
+    }
   </style>
 </head>
 <body>
@@ -192,6 +212,21 @@
       </div>
       <hr class="mt-4 border-gray-200"/>
     </header>
+
+    <section class="offline-panel" aria-label="Uso sin conexión">
+      <div role="status" aria-live="polite">
+        <strong id="offline-state">Preparando uso sin conexión…</strong>
+        <p id="offline-detail">La primera descarga necesita internet.</p>
+        <p>Los formatos enlazados de Google Drive requieren conexión.</p>
+      </div>
+      <button id="offline-check" class="btn btn-secondary" type="button">Guardar para usar sin conexión</button>
+    </section>
+    <dialog id="offline-update" class="offline-dialog" aria-labelledby="offline-update-title" aria-describedby="offline-update-description">
+      <h2 id="offline-update-title">Hay una actualización lista</h2>
+      <p id="offline-update-description">La nueva versión ya se descargó para usarla sin conexión. Actualiza y recarga para continuar con los datos más recientes.</p>
+      <p>Se conservarán las entradas de los cotizadores. Vuelve a consultar para calcular con la nueva versión.</p>
+      <button id="offline-reload" class="btn" type="button" autofocus>Actualizar y recargar</button>
+    </dialog>
 
     <!-- Sistema de pestañas -->
     <div class="tabs">
@@ -310,7 +345,7 @@
             <span class="primary-label">Prima Total Extra-Primada</span>
             <div class="flex items-center gap-2">
               <strong id="total-adjusted" class="money" style="font-size:1.6rem;font-weight:800;color:var(--mcb-green)">—</strong>
-              <span class="badge" id="badge-adjusted" style="background:var(--mcb-green)">+0%</span>
+              <span class="badge" id="badge-adjusted" style="background:var(--mcb-green);color:#fff">+0%</span>
             </div>
           </div>
           <div class="flex justify-between mt-1">
@@ -1567,6 +1602,173 @@
         });
       }
     });
+    // MODO SIN CONEXION
+    async function iniciarModoSinConexion() {
+      const estado = document.getElementById('offline-state');
+      const detalle = document.getElementById('offline-detail');
+      const comprobarBtn = document.getElementById('offline-check');
+      const dialogo = document.getElementById('offline-update');
+      const recargarBtn = document.getElementById('offline-reload');
+      const campos = ['cliente', 'producto', 'plan', 'vigencia', 'genero', 'edad', 'extraprima', 'pago-mixto',
+        'vt-genero', 'vt-condicion', 'vt-edad', 'vt-sa'];
+      const claveEntradas = 'mcb-tools-quote-inputs';
+      try {
+        const guardado = JSON.parse(sessionStorage.getItem(claveEntradas) || 'null');
+        sessionStorage.removeItem(claveEntradas);
+        if (guardado) {
+          for (const id of campos) {
+            const campo = document.getElementById(id);
+            if (campo && guardado[id]) { campo.value = guardado[id].value; campo.checked = guardado[id].checked; }
+          }
+          toggleProductoYPlan();
+          toggleTraspasoRM();
+          actualizarAvisoVigencia();
+        }
+      } catch (_) { /* La cotización puede continuar aunque el navegador no permita guardar entradas. */ }
+
+      if (!('serviceWorker' in navigator) || !window.isSecureContext) {
+        estado.textContent = 'Uso sin conexión no disponible en este navegador';
+        detalle.textContent = 'Abre la herramienta con HTTPS en un navegador actualizado.';
+        comprobarBtn.disabled = true;
+        return;
+      }
+      let registro;
+      let comprobando = false;
+      let copiaDisponible = false;
+      let observado;
+      let controlador = navigator.serviceWorker.controller;
+      let recargando = false;
+      const scope = new URL('./', window.location.href).href;
+
+      function mensaje(worker, type) {
+        return new Promise((resolve, reject) => {
+          const canal = new MessageChannel();
+          const cerrar = () => { canal.port1.close(); canal.port2.close(); };
+          const tiempo = setTimeout(() => { cerrar(); reject(new Error('Sin respuesta')); }, type === 'GET_OFFLINE_STATUS' ? 10000 : 120000);
+          canal.port1.onmessage = event => { clearTimeout(tiempo); cerrar(); resolve(event.data); };
+          try { worker.postMessage({ type }, [canal.port2]); }
+          catch (error) { clearTimeout(tiempo); cerrar(); reject(error); }
+        });
+      }
+
+      async function avisarActualizacion() {
+        const pendiente = registro?.waiting;
+        if (!pendiente || !navigator.serviceWorker.controller || dialogo.open) return;
+        const copia = await mensaje(pendiente, 'GET_OFFLINE_STATUS');
+        if (copia.ready && pendiente === registro.waiting && !dialogo.open) dialogo.showModal();
+      }
+
+      async function mostrarEstado() {
+        await avisarActualizacion();
+        copiaDisponible = false;
+        const worker = navigator.serviceWorker.controller || registro?.active;
+        if (!worker) {
+          estado.textContent = registro?.installing ? 'Guardando copia para usar sin conexión…' : 'Todavía no hay una copia sin conexión';
+          detalle.textContent = 'Mantén la conexión hasta que aparezca «Disponible sin conexión».';
+          comprobarBtn.textContent = 'Guardar para usar sin conexión';
+          return;
+        }
+        const copia = await mensaje(worker, 'GET_OFFLINE_STATUS');
+        copiaDisponible = copia.ready;
+        estado.textContent = copia.ready
+          ? (navigator.onLine ? 'Disponible sin conexión' : 'Sin conexión · copia disponible')
+          : 'Falta guardar una copia completa';
+        detalle.textContent = copia.ready && copia.savedAt
+          ? `Última descarga: ${new Date(copia.savedAt).toLocaleString('es-MX')} · Revisa también la vigencia tarifaria seleccionada.`
+          : 'Conéctate y pulsa «Guardar para usar sin conexión» antes de salir.';
+        comprobarBtn.textContent = copia.ready ? 'Buscar actualizaciones' : 'Guardar para usar sin conexión';
+      }
+
+      function observarInstalacion() {
+        const worker = registro.installing;
+        if (!worker || worker === observado) return;
+        observado = worker;
+        comprobarBtn.disabled = true;
+        estado.textContent = controlador ? 'Descargando actualización…' : 'Guardando copia para usar sin conexión…';
+        worker.addEventListener('statechange', async () => {
+          if (!['installed', 'activated', 'redundant'].includes(worker.state)) return;
+          comprobarBtn.disabled = false;
+          try {
+            await mostrarEstado();
+            if (worker.state === 'redundant') detalle.textContent += ' No se pudo completar la descarga; vuelve a intentarlo con conexión.';
+          } catch (_) { estado.textContent = 'No se pudo verificar la copia sin conexión'; }
+        });
+      }
+
+      async function comprobar(manual = false) {
+        if (comprobando) return;
+        comprobando = true;
+        comprobarBtn.disabled = true;
+        try {
+          if (!registro) {
+            registro = await navigator.serviceWorker.getRegistration(scope);
+            if (registro?.scope !== scope) registro = null;
+            if (!registro) registro = await navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' });
+            registro.addEventListener('updatefound', observarInstalacion);
+            observarInstalacion();
+          }
+          if (navigator.onLine) await registro.update();
+          observarInstalacion();
+          const worker = navigator.serviceWorker.controller || registro.active;
+          if ((manual || registro.waiting) && navigator.onLine && worker && !registro.installing) {
+            const destino = registro.waiting || worker;
+            const copia = await mensaje(destino, 'GET_OFFLINE_STATUS');
+            if (!copia.ready) {
+              estado.textContent = 'Guardando copia para usar sin conexión…';
+              const guardada = await mensaje(destino, 'CACHE_OFFLINE');
+              if (!guardada.ready) throw new Error('Copia incompleta');
+            }
+          }
+          await mostrarEstado();
+        } catch (_) {
+          try { await mostrarEstado(); }
+          catch (_) { estado.textContent = 'No se pudo verificar la copia sin conexión'; }
+          detalle.textContent += copiaDisponible
+            ? ' No se pudieron buscar actualizaciones. Puedes seguir usando la copia guardada.'
+            : ' No se pudo completar la descarga. Vuelve a intentarlo con conexión.';
+        } finally {
+          comprobando = false;
+          comprobarBtn.disabled = Boolean(registro?.installing);
+        }
+      }
+
+      dialogo.addEventListener('cancel', event => event.preventDefault());
+      recargarBtn.addEventListener('click', async () => {
+        if (!registro?.waiting) { comprobar(); return; }
+        recargarBtn.disabled = true;
+        recargarBtn.textContent = 'Recargando…';
+        try {
+          const copia = await mensaje(registro.waiting, 'ACTIVATE_UPDATE');
+          if (!copia.ready || copia.error) throw new Error('Copia incompleta');
+        } catch (_) {
+          document.getElementById('offline-update-description').textContent = 'No se pudo completar la actualización. La copia anterior se conserva. Conéctate y vuelve a intentarlo.';
+          recargarBtn.disabled = false;
+          recargarBtn.textContent = 'Reintentar actualización';
+        }
+      });
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!controlador) { controlador = navigator.serviceWorker.controller; mostrarEstado().catch(() => {}); return; }
+        if (recargando) return;
+        recargando = true;
+        try {
+          const entradas = Object.fromEntries(campos.map(id => {
+            const campo = document.getElementById(id);
+            return [id, { value: campo.value, checked: campo.checked }];
+          }));
+          sessionStorage.setItem(claveEntradas, JSON.stringify(entradas));
+        } catch (_) { /* Recargar sigue siendo posible si el almacenamiento está deshabilitado. */ }
+        window.location.reload();
+      });
+      comprobarBtn.addEventListener('click', () => comprobar(true));
+      window.addEventListener('online', () => comprobar());
+      window.addEventListener('offline', () => mostrarEstado().catch(() => {}));
+      window.addEventListener('focus', () => comprobar());
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') comprobar(); });
+      setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLine) comprobar(); }, 15 * 60 * 1000);
+      await comprobar();
+    }
+    // FIN MODO SIN CONEXION
+    iniciarModoSinConexion();
   </script>
 </body>
 </html>

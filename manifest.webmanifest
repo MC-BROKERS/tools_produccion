@@ -1,0 +1,14 @@
+{
+  "id": "./",
+  "name": "Herramientas MCBrokers",
+  "short_name": "MCBrokers",
+  "lang": "es-MX",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0057A4",
+  "icons": [
+    { "src": "assets/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
