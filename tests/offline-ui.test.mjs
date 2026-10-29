@@ -11,7 +11,9 @@ class Element extends EventTarget {
   open = false;
   value = '';
   checked = false;
+  dataset = {};
   showModal() { this.open = true; }
+  close() { this.open = false; }
   click() { this.dispatchEvent(new Event('click')); }
 }
 
@@ -20,7 +22,8 @@ async function openApp({ ready = true, waiting = false, candidateReady = true, c
   const start = html.indexOf('    // MODO SIN CONEXION');
   const end = html.indexOf('    // FIN MODO SIN CONEXION');
   assert.ok(start >= 0 && end > start, 'La herramienta debe implementar el modo sin conexión');
-  const nodes = Object.fromEntries(['offline-state', 'offline-detail', 'offline-check', 'offline-update', 'offline-reload', 'offline-update-description',
+  const nodes = Object.fromEntries(['connection-status', 'connection-label', 'offline-info', 'offline-close',
+    'offline-state', 'offline-detail', 'offline-check', 'offline-update', 'offline-reload', 'offline-update-description',
     'cliente', 'producto', 'plan', 'vigencia', 'genero', 'edad', 'extraprima', 'pago-mixto',
     'vt-genero', 'vt-condicion', 'vt-edad', 'vt-sa'].map(id => [id, new Element()]));
   nodes.edad.value = '25';
@@ -46,16 +49,66 @@ async function openApp({ ready = true, waiting = false, candidateReady = true, c
   const document = new EventTarget();
   Object.assign(document, { visibilityState: 'visible', getElementById: id => nodes[id] || null });
   const window = new EventTarget();
+  const navigator = { serviceWorker, onLine: true };
   let reloads = 0;
   Object.assign(window, { isSecureContext: true, location: { href: 'https://example.test/tools_produccion/', reload: () => reloads++ } });
-  const context = vm.createContext({ window, document, navigator: { serviceWorker, onLine: true },
+  const context = vm.createContext({ window, document, navigator,
     URL, Date, Event, MessageChannel, setTimeout, clearTimeout, setInterval: () => 1,
     sessionStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
-    toggleProductoYPlan: () => {}, toggleTraspasoRM: () => {}, actualizarAvisoVigencia: () => {} });
+    $: selector => nodes[selector.slice(1)],
+    toggleProductoYPlan: () => {}, actualizarAvisoVigencia: () => {} });
+  const normalizar = html.match(/    function normalizarPlanStrm\(\) \{[\s\S]*?\n    \}/);
+  assert.ok(normalizar, 'Debe normalizar planes retirados al recuperar entradas');
+  vm.runInContext(normalizar[0], context);
   vm.runInContext(html.slice(start, end), context);
   await context.iniciarModoSinConexion();
-  return { nodes, status, candidateStatus, messages, serviceWorker, worker, registration, storage, reloads: () => reloads };
+  return { nodes, status, candidateStatus, messages, serviceWorker, worker, registration, storage, navigator, window, reloads: () => reloads };
 }
+
+test('indicador compacto muestra conexión y abre el detalle sólo al seleccionarlo', async () => {
+  const app = await openApp();
+  assert.equal(app.nodes['connection-label'].textContent, 'Online');
+  assert.equal(app.nodes['offline-info'].open, false);
+  app.nodes['connection-status'].click();
+  assert.equal(app.nodes['offline-info'].open, true);
+  app.nodes['offline-close'].click();
+  assert.equal(app.nodes['offline-info'].open, false);
+  app.navigator.onLine = false;
+  app.window.dispatchEvent(new Event('offline'));
+  assert.equal(app.nodes['connection-label'].textContent, 'Offline');
+  assert.equal(app.nodes['offline-info'].open, false);
+  for (let i = 0; i < 10; i++) await setImmediate();
+  app.nodes['connection-status'].click();
+  assert.match(app.nodes['offline-state'].textContent, /Sin conexión.*copia disponible/);
+  app.navigator.onLine = true;
+  app.window.dispatchEvent(new Event('online'));
+  assert.equal(app.nodes['connection-label'].textContent, 'Online');
+});
+
+test('al llegar una actualización, el aviso obligatorio queda sobre el detalle de conexión', async () => {
+  const app = await openApp();
+  app.nodes['connection-status'].click();
+  assert.equal(app.nodes['offline-info'].open, true);
+  app.registration.waiting = new EventTarget();
+  app.registration.waiting.postMessage = (_, ports) => ports[0]?.postMessage(app.status);
+  app.window.dispatchEvent(new Event('online'));
+  for (let i = 0; i < 15; i++) await setImmediate();
+  assert.equal(app.nodes['offline-info'].open, false);
+  assert.equal(app.nodes['offline-update'].open, true);
+  app.nodes['connection-status'].click();
+  assert.equal(app.nodes['offline-info'].open, false);
+});
+
+test('restauración normaliza un plan retirado o vacío a T1 y conserva T2 y vigencia', async () => {
+  for (const plan of ['TraspasoRM', '']) {
+    const app = await openApp({ saved: { plan: { value: plan }, vigencia: { value: '2025-2026' } } });
+    assert.equal(app.nodes.plan.value, 'T1');
+    assert.equal(app.nodes.vigencia.value, '2025-2026');
+  }
+  const app = await openApp({ saved: { plan: { value: 'T2' }, vigencia: { value: '2025-2026' } } });
+  assert.equal(app.nodes.plan.value, 'T2');
+  assert.equal(app.nodes.vigencia.value, '2025-2026');
+});
 
 test('confirma disponibilidad solo cuando la copia completa fue verificada', async () => {
   const app = await openApp();
