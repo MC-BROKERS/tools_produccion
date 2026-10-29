@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="104" fill="#0057A4"/>
+  <circle cx="204" cy="139" r="27" fill="#9CCB3B"/>
+  <circle cx="270" cy="118" r="21" fill="#2FA24A"/>
+  <circle cx="322" cy="158" r="24" fill="#9CCB3B"/>
+  <text x="256" y="329" text-anchor="middle" font-family="Arial, sans-serif" font-size="151" font-weight="700" fill="#fff">MCB</text>
+</svg>

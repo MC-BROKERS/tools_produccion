@@ -31,7 +31,35 @@ proyecto/
 
 ## 🚀 Uso
 
-Abre la herramienta desde **GitHub Pages**. No funciona abriéndola directamente como archivo local (`file://`) porque el navegador bloquea las peticiones `fetch()` en ese protocolo.
+Abre la herramienta desde **GitHub Pages**. La primera visita necesita internet: espera el mensaje **Disponible sin conexión** antes de salir. Se guarda una copia completa de la página, su diseño y todas las tarifas disponibles en ese navegador y equipo.
+
+Después puedes cerrar y volver a abrir la herramienta sin señal. También puedes agregarla a la pantalla de inicio desde el menú del navegador. Si borras los datos del navegador o este libera su almacenamiento, tendrás que descargarla nuevamente. Evita la navegación privada para este uso.
+
+Los cotizadores GNP Salud y VidaTotal, la consulta de menús y las campañas funcionan con la copia descargada. Los formatos enlazados de Google Drive requieren conexión o una descarga aparte.
+
+### Actualizaciones
+
+- La herramienta comprueba novedades al abrir, al recuperar conexión o foco, y cada 15 minutos mientras está visible.
+- Si hay cambios de código o datos, primero descarga y verifica el paquete completo. Una descarga incompleta conserva la versión anterior.
+- Cuando la nueva copia está lista, aparece un aviso obligatorio: **Actualizar y recargar**. La recarga activa la versión nueva en las pestañas abiertas del sitio y conserva las entradas de los cotizadores. Es necesario volver a consultar para recalcular las primas.
+- **Buscar actualizaciones** permite comprobar manualmente. La última descarga indicada corresponde a la copia local; no sustituye la vigencia tarifaria ni la fecha de origen de una tarifa.
+- Sin conexión no se pueden descubrir cambios nuevos. Una actualización que ya terminó de descargarse sí puede activarse sin internet.
+
+### Prueba y publicación
+
+Requiere Node.js 24, sin instalar paquetes adicionales:
+
+```sh
+node --test tests/*.test.mjs
+node scripts/build-site.mjs
+python3 -m http.server 8000 --directory _site
+```
+
+Abre `http://localhost:8000`. No funciona con `file://`. El generador copia solo recursos públicos y crea `sw.js` con una versión SHA-256 derivada de la página, datos, tarifas, assets y lógica del worker. Un cambio de solo JSON también produce una actualización.
+
+El workflow **Publicar herramientas** comprueba y genera el paquete en los PR; publica solo desde `main`. Al activar esta funcionalidad, configura **Settings → Pages → Source → GitHub Actions** para publicar `_site`. El worker usa el scope relativo del proyecto y solo limpia las cachés `mcb-tools-produccion-` de esta herramienta.
+
+Tailwind 3.4.17 se conserva localmente en `assets/tailwind-3.4.17.js`, con su licencia, para que el diseño no dependa de una conexión al CDN.
 
 ## 🎯 Cotizador GNP Salud
 
