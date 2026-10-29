@@ -31,11 +31,13 @@ proyecto/
 
 ## 🚀 Uso
 
-Abre la herramienta desde **GitHub Pages**. La primera visita necesita internet: pulsa el botón **Online** y espera el mensaje **Disponible sin conexión** antes de salir. Se guarda una copia completa de la página, su diseño y todas las tarifas disponibles en ese navegador y equipo.
+Abre la herramienta desde **GitHub Pages**. La primera visita necesita internet. La cabecera separa **Con conexión / Sin conexión** del estado de la copia local. Mientras se descargan datos indica **Descargando · espera**. No cierres ni recargues hasta ver **Disponible sin conexión**; al pulsar cualquiera de los estados se abre el detalle.
 
-El indicador compacto muestra **Online** u **Offline**. Al pulsarlo se abre el detalle de la copia local y el botón para guardar o buscar actualizaciones. El detalle se puede cerrar; el aviso obligatorio de actualización sigue apareciendo cuando corresponde.
+En iPhone, iPad y Android aparece **Agregar al inicio**, debajo de los dos estados. Android abre la confirmación nativa cuando el navegador ofrece instalación; en los demás casos muestra las instrucciones del dispositivo. iPhone requiere completar la acción desde el menú de Safari. Las computadoras no muestran este botón.
 
-Después puedes cerrar y volver a abrir la herramienta sin señal. También puedes agregarla a la pantalla de inicio desde el menú del navegador. Si borras los datos del navegador o este libera su almacenamiento, tendrás que descargarla nuevamente. Evita la navegación privada para este uso.
+Después de agregar el acceso, abre la herramienta **desde ese ícono, con internet**, y espera **Disponible sin conexión** antes de salir. En iPhone, el almacenamiento de Safari puede ser distinto del de la web abierta desde el ícono.
+
+Desde el detalle puedes **Solicitar persistencia** y consultar si el navegador la concedió. La protección no sustituye la descarga y no garantiza conservación indefinida: borrar datos del sitio elimina la copia, y el navegador decide si concede protección frente a la limpieza automática. Evita la navegación privada. Si falta la copia, abre con internet y descárgala de nuevo.
 
 Los cotizadores GNP Salud y VidaTotal, la consulta de menús y las campañas funcionan con la copia descargada. Los formatos enlazados de Google Drive requieren conexión o una descarga aparte.
 
@@ -60,6 +62,8 @@ python3 -m http.server 8000 --directory _site
 Abre `http://localhost:8000`. No funciona con `file://`. El generador copia solo recursos públicos y crea `sw.js` con una versión SHA-256 derivada de la página, datos, tarifas, assets y lógica del worker. Un cambio de solo JSON también produce una actualización.
 
 El workflow **Publicar herramientas** comprueba y genera el paquete en los PR; publica solo desde `main`. Al activar esta funcionalidad, configura **Settings → Pages → Source → GitHub Actions** para publicar `_site`. El worker usa el scope relativo del proyecto y solo limpia las cachés `mcb-tools-produccion-` de esta herramienta.
+
+La lógica de negocio permanece en `index.html`. Los estilos de identidad y la presentación se separan en `assets/mcb-tokens.css`, `assets/app-ui.css` y `assets/app-ui.js`, y la ayuda de instalación/persistencia en `assets/prepare-device.js`, para mantener estos cambios independientes de las fórmulas y facilitar su verificación. El generador incluye estos archivos, las fuentes con sus licencias y los íconos PNG de 180/192/512 px en el mismo paquete verificado para uso sin conexión. El visor de revisión y sus simulaciones no forman parte del sitio publicado.
 
 Tailwind 3.4.17 se conserva localmente en `assets/tailwind-3.4.17.js`, con su licencia, para que el diseño no dependa de una conexión al CDN.
 
@@ -152,6 +156,6 @@ Edita `data/ejemplos-expedientes.json`:
 
 ---
 
-**Versión**: 1.3
-**Última actualización**: Mayo 2026
+**Versión del paquete**: SHA-256 generado automáticamente
+**Última actualización de interfaz**: Octubre 2026
 **MCBrokers** — Herramientas Internas
