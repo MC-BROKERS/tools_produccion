@@ -1081,12 +1081,22 @@
       }
     ];
 
+    const AUTOS_DATA_OT = AUTOS_DATA.map(mov => ({
+      ...mov,
+      formatos: mov.formatos.filter(f => f.nombre !== 'Formato de Servicios Asistidos (GNP)')
+    }));
+
+    const AUTOS_DATA_ANA_AXA = AUTOS_DATA_OT.map(mov => ({
+      ...mov,
+      formatos: mov.formatos.filter(f => f.nombre !== 'Carta de Aceptación de Nuevas Condiciones (GNP y Qualitas)')
+    }));
+
     const MENUS_DATA = {
       Autos: {
-        ANA:      AUTOS_DATA,
-        AXA:      AUTOS_DATA,
+        ANA:      AUTOS_DATA_ANA_AXA,
+        AXA:      AUTOS_DATA_ANA_AXA,
         GNP:      AUTOS_DATA,
-        Qualitas: AUTOS_DATA
+        Qualitas: AUTOS_DATA_OT
       },
       Salud: {
         GNP: [
